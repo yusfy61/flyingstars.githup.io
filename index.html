@@ -1,0 +1,1737 @@
+    <!DOCTYPE html>
+    <html lang="tr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        <title>Flying Stars ⚽</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Teko:wght@700&family=Quicksand:wght@600;700;800&display=swap');
+            * {
+                box-sizing: border-box;
+                -webkit-tap-highlight-color: transparent;
+                -webkit-user-select: none;
+                user-select: none;
+            }
+            html, body { height: 100%; }
+            body {
+                font-family: 'Quicksand', sans-serif;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                height: 100vh;
+                height: 100dvh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                touch-action: none;
+                background:
+                    radial-gradient(ellipse 55% 45% at 12% 0%, rgba(56, 189, 248, 0.20), transparent 70%),
+                    radial-gradient(ellipse 55% 45% at 88% 0%, rgba(251, 191, 36, 0.15), transparent 70%),
+                    linear-gradient(180deg, #020617 0%, #0b1d3a 55%, #052e1a 100%);
+            }
+            /* Stadyum zemini: iki yanı dolduran çim şeritleri */
+            body::after {
+                content: '';
+                position: fixed;
+                left: 0; right: 0; bottom: 0;
+                height: 28vh;
+                background: repeating-linear-gradient(90deg, rgba(22, 101, 52, 0.45) 0 70px, rgba(21, 128, 61, 0.45) 70px 140px);
+                -webkit-mask-image: linear-gradient(to top, #000, transparent);
+                mask-image: linear-gradient(to top, #000, transparent);
+                pointer-events: none;
+                z-index: 0;
+            }
+            .font-salah { font-family: 'Teko', sans-serif; letter-spacing: 1px; }
+
+            /* Oyunun DIŞINDAKİ arka plan: seçilen takım logosu (PC'de iki yanda görünür) */
+            #bgLogo {
+                position: fixed;
+                left: 50%; top: 50%;
+                width: min(160vh, 100vw);
+                height: min(160vh, 100vw);
+                transform: translate(-50%, -50%);
+                background: center / contain no-repeat;
+                opacity: 0.22;           /* 0.10 = daha silik, 0.35 = daha belirgin */
+                filter: blur(2px);
+                pointer-events: none;
+                z-index: 0;
+                -webkit-mask-image: radial-gradient(circle, #000 35%, transparent 72%);
+                mask-image: radial-gradient(circle, #000 35%, transparent 72%);
+            }
+            /* Telefonda oyunun üstünde/altında kalan boşluklara seçilen logo */
+            .bgBar {
+                position: fixed; left: 0; right: 0;
+                display: none; pointer-events: none; z-index: 0;
+                padding: 12px;
+                background: center / contain no-repeat;
+                background-origin: content-box;
+                background-clip: content-box;
+                opacity: 0.45;
+            }
+            #bgLogoTop { top: 0; }
+            #bgLogoBottom { bottom: 0; }
+
+            #stage { position: relative; flex-shrink: 0; z-index: 1; }
+            #gameWrap { position: relative; width: 400px; height: 580px; transform-origin: top left; }
+
+            #gameCanvas {
+                box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.7);
+                touch-action: none;
+                display: block;
+                will-change: transform;
+                transform: translateZ(0);
+            }
+            .card-bg { background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95)); border: 2px solid #38bdf8; border-radius: 1.25rem; }
+            .custom-scroll::-webkit-scrollbar { width: 6px; }
+            .custom-scroll::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 10px; }
+            .btn-brawl { box-shadow: 0 6px 0 #b45309; }
+            .btn-brawl:active { box-shadow: 0 2px 0 #b45309; transform: translateY(4px); }
+
+            @keyframes boxShake {
+                0%, 100% { transform: rotate(0deg) scale(1); }
+                20% { transform: rotate(-8deg) scale(1.05); }
+                40% { transform: rotate(8deg) scale(1.08); }
+                60% { transform: rotate(-6deg) scale(1.05); }
+                80% { transform: rotate(6deg) scale(1.02); }
+            }
+            .animate-shake { animation: boxShake 0.4s ease-in-out infinite; }
+        </style>
+    </head>
+    <body>
+    <div id="bgLogo"></div>
+    <div id="bgLogoTop" class="bgBar"></div>
+    <div id="bgLogoBottom" class="bgBar"></div>
+
+    <div id="stage">
+        <div id="gameWrap">
+            <canvas id="gameCanvas" class="rounded-2xl border-4 border-sky-900/80 bg-emerald-900 cursor-pointer"></canvas>
+
+            <!-- Sol Üst Header -->
+            <div id="topLobbyHeader" class="absolute top-3 left-3 right-3 flex items-center justify-between gap-1.5 bg-slate-950/90 border-2 border-amber-500/80 px-2 py-1.5 rounded-xl shadow-xl z-20">
+                <div id="profileClickArea" title="Profili Düzenle" class="flex items-center gap-1 cursor-pointer active:scale-95 transition flex-shrink-0">
+                    <div class="w-7 h-7 rounded-lg bg-slate-900 border border-amber-400 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <img id="headerAvatarImg" src="ts.jpg" class="w-full h-full object-cover">
+                    </div>
+                    <span id="displayUsername" class="text-[11px] font-black text-white leading-tight">OYUNCU</span>
+                </div>
+
+                <div class="flex items-center gap-1 flex-1 justify-end">
+                    <div class="flex items-center justify-center gap-0.5 bg-slate-900/90 px-1.5 py-1 rounded-lg border border-purple-500/40">
+                        <span class="text-xs">🪙</span>
+                        <span id="headerTokensText" class="text-xs font-extrabold text-purple-300 font-salah">0</span>
+                    </div>
+                    <div class="flex items-center justify-center gap-0.5 bg-slate-900/90 px-1.5 py-1 rounded-lg border border-amber-500/40">
+                        <span class="text-xs">🏆</span>
+                        <span id="totalTrophiesText" class="text-xs font-extrabold text-yellow-300 font-salah">0</span>
+                    </div>
+                    <div class="flex items-center justify-center gap-0.5 bg-slate-900/90 px-1.5 py-1 rounded-lg border border-emerald-500/40">
+                        <span class="text-xs">👑</span>
+                        <span id="highScoreText" class="text-xs font-extrabold text-emerald-300 font-salah">0</span>
+                    </div>
+                    <button id="openSettingsBtn" title="Ayarlar" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg flex items-center justify-center text-xs font-bold text-slate-200 shadow active:scale-95 transition flex-shrink-0">⚙</button>
+                </div>
+            </div>
+
+            <!-- Sol Menü -->
+            <div id="leftLobbyMenu" class="absolute top-16 left-3 flex flex-col gap-2 z-20">
+                <button id="openStarsBtn" class="bg-gradient-to-r from-sky-600 to-blue-700 border-2 border-sky-400 text-white font-salah px-3 py-1.5 rounded-xl shadow-lg active:scale-95 transition">
+                    <span class="text-base tracking-wider">STARS</span>
+                </button>
+            </div>
+
+            <!-- Durdurma Butonu (oyun içi, sağ üst) -->
+            <button id="pauseBtn" title="Durdur" class="hidden absolute top-3 right-3 z-20 w-9 h-9 bg-slate-950/80 border-2 border-amber-500/80 rounded-xl flex items-center justify-center text-amber-300 font-black text-sm shadow-lg active:scale-90 transition">❚❚</button>
+
+            <!-- Gol Bildirimi -->
+            <div id="salahCelebration" class="hidden absolute top-20 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 via-sky-600 to-amber-500 text-white font-salah text-lg sm:text-xl px-4 py-1.5 rounded-2xl shadow-2xl border-2 border-amber-300 animate-bounce text-center whitespace-normal z-20 leading-tight">GOOOOL!</div>
+
+            <!-- Durdurma Menüsü -->
+            <div id="pauseOverlay" class="hidden absolute inset-0 z-40 flex items-center justify-center bg-black/70 backdrop-blur-[2px] rounded-2xl p-4">
+                <div class="card-bg text-center p-5 rounded-2xl shadow-2xl max-w-xs w-full border-amber-400">
+                    <h2 class="text-4xl font-salah text-amber-400 mb-0.5 leading-none">DURAKLATILDI</h2>
+                    <p class="text-[11px] text-slate-400 font-semibold mb-4">Şu anki skor: <span id="pauseScore" class="text-yellow-300 font-black">0</span> gol</p>
+                    <div class="space-y-2.5">
+                        <button id="resumeBtn" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-salah text-2xl rounded-xl shadow-lg active:scale-95 transition">DEVAM ET</button>
+                        <button id="pauseRestartBtn" class="w-full py-2 bg-slate-800 text-sky-300 border border-sky-500/40 font-salah text-xl rounded-xl active:scale-95 transition">YENİDEN BAŞLA</button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="pauseMusicBtn" class="py-1.5 text-[11px] font-bold rounded-lg border">🎵 Müzik</button>
+                            <button id="pauseSfxBtn" class="py-1.5 text-[11px] font-bold rounded-lg border">🔊 Efekt</button>
+                        </div>
+                        <button id="quitBtn" class="w-full py-2 bg-red-950/80 text-red-400 border border-red-700 font-salah text-xl rounded-xl active:scale-95 transition">OYUNDAN ÇIK</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Arayüz Overlay -->
+            <div id="uiOverlay" class="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-black/60 backdrop-blur-[2px] p-4 transition-all duration-300 z-10">
+
+                <!-- Profil Kartı -->
+                <div id="nameCard" class="hidden card-bg text-center p-5 rounded-2xl shadow-2xl max-w-xs w-full border-amber-400 z-40">
+                    <h2 class="text-2xl font-salah text-amber-400 mb-0.5">PROFİL</h2>
+                    <p class="text-slate-300 text-[11px] mb-3">İsmini ve takım logosunu belirle:</p>
+                    <input type="text" id="usernameInput" placeholder="Oyuncu Adın..." maxlength="12" class="w-full bg-slate-900 border-2 border-sky-500 rounded-xl px-3 py-2 text-center text-white font-bold text-sm focus:outline-none focus:border-amber-400 mb-3">
+                    <div class="text-[11px] font-bold text-sky-300 mb-1.5 text-left">TAKIM KAPAK FOTOĞRAFI:</div>
+                    <div class="grid grid-cols-4 gap-2 mb-4 max-h-36 overflow-y-auto custom-scroll pr-1">
+                        <div onclick="selectAvatar('ts.jpg')" data-avatar="ts.jpg" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="ts.jpg" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-sky-400">TS</span></div>
+                        <div onclick="selectAvatar('gs.png')" data-avatar="gs.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="gs.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-red-400">GS</span></div>
+                        <div onclick="selectAvatar('bjk.png')" data-avatar="bjk.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="bjk.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-slate-300">BJK</span></div>
+                        <div onclick="selectAvatar('fb.png')" data-avatar="fb.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="fb.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-yellow-400">FB</span></div>
+                        <div onclick="selectAvatar('assets/barca.png')" data-avatar="assets/barca.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="assets/barca.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-blue-400">BAR</span></div>
+                        <div onclick="selectAvatar('assets/atlmadrid.png')" data-avatar="assets/atlmadrid.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="assets/atlmadrid.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-red-500">ATM</span></div>
+                        <div onclick="selectAvatar('assets/dortmund.png')" data-avatar="assets/dortmund.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="assets/dortmund.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-yellow-400">BVB</span></div>
+                        <div onclick="selectAvatar('assets/chelsea.png')" data-avatar="assets/chelsea.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="assets/chelsea.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-blue-600">CHE</span></div>
+                        <div onclick="selectAvatar('assets/psg.png')" data-avatar="assets/psg.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="assets/psg.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-blue-500">PSG</span></div>
+                        <div onclick="selectAvatar('assets/madrid.png')" data-avatar="assets/madrid.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="assets/madrid.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-purple-300">RMA</span></div>
+                        <div onclick="selectAvatar('assets/liverpool.png')" data-avatar="assets/liverpool.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="assets/liverpool.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-red-500">LIV</span></div>
+                        <div onclick="selectAvatar('fr.png')" data-avatar="fr.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="fr.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-blue-400">FR</span></div>
+                        <div onclick="selectAvatar('mancity.png')" data-avatar="mancity.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="mancity.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-sky-300">MC</span></div>
+                        <div onclick="selectAvatar('superlig.png')" data-avatar="superlig.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="superlig.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-red-500">SL</span></div>
+                        <div onclick="selectAvatar('munih.png')" data-avatar="munih.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="munih.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-red-500">MÜN</span></div>
+                        <div onclick="selectAvatar('ucl.png')" data-avatar="ucl.png" class="avatar-option border-2 border-slate-700 rounded-xl p-1 bg-slate-900 cursor-pointer flex flex-col items-center"><img src="ucl.png" class="w-10 h-10 object-cover rounded-lg"><span class="text-[9px] font-bold mt-1 text-sky-300">UCL</span></div>
+                    </div>
+                    <button id="saveNameBtn" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-salah text-2xl rounded-xl shadow-lg active:scale-95 transition">KAYDET</button>
+                </div>
+
+                <!-- GELİŞMİŞ AYARLAR MODALI -->
+                <div id="settingsCard" class="hidden card-bg text-center p-5 rounded-2xl shadow-2xl max-w-xs w-full border-sky-400 z-40">
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+                        <h2 class="text-2xl font-salah text-sky-400 m-0">GELİŞMİŞ AYARLAR</h2>
+                        <button id="closeSettingsBtn" class="text-slate-400 hover:text-white font-bold text-lg px-2">✕</button>
+                    </div>
+
+                    <div class="space-y-3 text-left">
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-slate-200">Müzik Sesi</span>
+                                <button id="toggleMusicBtn" class="text-xs px-2 py-0.5 rounded font-bold transition">AÇIK</button>
+                            </div>
+                            <input type="range" id="musicVolumeSlider" min="0" max="100" value="100" class="w-full accent-sky-400 cursor-pointer">
+                        </div>
+
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-slate-200">Efekt Sesi (SFX)</span>
+                                <button id="toggleSfxBtn" class="text-xs px-2 py-0.5 rounded font-bold transition">AÇIK</button>
+                            </div>
+                            <input type="range" id="sfxVolumeSlider" min="0" max="100" value="100" class="w-full accent-sky-400 cursor-pointer">
+                        </div>
+
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-200">Dokunma Titreşimi</span>
+                            <button id="toggleVibrationBtn" class="text-xs px-2.5 py-1 bg-emerald-950/80 border border-emerald-700 text-emerald-400 rounded-lg font-bold">AÇIK</button>
+                        </div>
+
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-xs font-bold text-slate-200 block mb-1.5">Oyun Zorluğu</span>
+                            <div class="grid grid-cols-3 gap-1.5 text-center">
+                                <button onclick="setDifficulty('easy')" id="diff_easy" class="text-[10px] font-bold py-1 border border-slate-700 rounded bg-slate-800 text-slate-400">KOLAY</button>
+                                <button onclick="setDifficulty('normal')" id="diff_normal" class="text-[10px] font-bold py-1 border border-amber-500 rounded bg-amber-500 text-slate-950">NORMAL</button>
+                                <button onclick="setDifficulty('hard')" id="diff_hard" class="text-[10px] font-bold py-1 border border-slate-700 rounded bg-slate-800 text-slate-400">ZOR</button>
+                            </div>
+                        </div>
+
+                        <div class="pt-1">
+                            <button id="resetDataBtn" class="w-full py-1.5 bg-red-950/80 hover:bg-red-900/80 border border-red-700 text-red-400 font-bold text-xs rounded-xl transition">
+                                Tüm Oyun Verilerini Sıfırla 🗑️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ana Lobi Ekranı -->
+                <div id="startCard" class="w-full h-full flex flex-col justify-between p-3 z-20">
+                    <div class="flex-1 flex flex-col items-center justify-center mt-6">
+                        <div class="bg-amber-950/90 border-2 border-amber-400 px-3 py-0.5 rounded-xl text-xs font-bold text-amber-300 mb-2 shadow-lg flex items-center gap-1.5">
+                            <span class="text-slate-200 text-[10px] font-extrabold uppercase">Karakter Kupası:</span>
+                            <span id="characterTrophies" class="font-salah text-xl text-yellow-300">0</span>
+                        </div>
+
+                        <div class="relative flex items-center justify-center w-full max-w-[220px]">
+                            <button id="prevFormBtn" class="absolute -left-2 z-30 w-8 h-8 bg-slate-900/90 border-2 border-amber-400 rounded-full text-amber-300 font-black text-xs flex items-center justify-center shadow-lg active:scale-90 transition">◀</button>
+
+                            <!-- Görsel Alanı -->
+                            <div class="relative w-28 h-28 sm:w-32 sm:h-32 bg-gradient-to-tr from-sky-600 via-amber-500 to-yellow-400 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/90 overflow-hidden">
+                                <img id="activeStarImg" src="images.jpg" alt="Active Star" class="w-full h-full object-cover object-top">
+                            </div>
+
+                            <button id="nextFormBtn" class="absolute -right-2 z-30 w-8 h-8 bg-slate-900/90 border-2 border-amber-400 rounded-full text-amber-300 font-black text-xs flex items-center justify-center shadow-lg active:scale-90 transition">▶</button>
+                        </div>
+
+                        <div id="formDotsContainer" class="flex items-center justify-center gap-2 mt-2 mb-1">
+                            <span id="dotForm1" onclick="selectFormFromDot(1)" class="w-2.5 h-2.5 rounded-full bg-amber-400 scale-125 transition-all cursor-pointer"></span>
+                            <span id="dotForm2" onclick="selectFormFromDot(2)" class="w-2.5 h-2.5 rounded-full bg-slate-600 transition-all cursor-pointer"></span>
+                        </div>
+
+                        <div id="activeStarName" class="text-2xl font-salah text-yellow-400 leading-none mt-0.5">MOHAMED SALAH</div>
+                        <div id="activeStarTitle" class="text-[11px] text-sky-300 font-bold">Trabzonspor 🔴🔵</div>
+
+                        <!-- KİLİTLİ KARAKTER BİLGİSİ (jetonla açılmaz) -->
+                        <div id="charLockInfo" class="hidden mt-2 z-30 bg-slate-900/90 border-2 border-slate-600 text-slate-200 font-black text-xs px-4 py-1.5 rounded-xl shadow-xl items-center gap-1.5 flex">
+                            <span>🔒 KİLİTLİ:</span>
+                            <span id="charLockProgress" class="font-salah text-xl text-amber-300">0 / 500 🏆</span>
+                        </div>
+
+                        <!-- V2 SKİN AÇMA BUTONU -->
+                        <div id="skinUnlockContainer" class="hidden mt-2 z-30">
+                            <button onclick="buyCurrentSkin()" class="bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-xs px-4 py-1.5 rounded-xl border-2 border-yellow-200 shadow-xl active:scale-95 transition flex items-center gap-1.5">
+                                <span id="unlockBtnText">🔓 AÇ:</span>
+                                <span id="unlockBtnCost" class="font-salah text-xl text-slate-950 font-extrabold">400 🪙</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- KUTULAR -->
+                    <div class="w-full flex flex-col items-center gap-2 pb-1">
+                        <div class="flex gap-6 w-full justify-center max-w-xs items-start">
+                            <!-- Küçük Kutu -->
+                            <div class="flex flex-col items-center">
+                                <div class="relative group cursor-pointer flex items-center justify-center">
+                                    <img src="assets/kucukkutu.png" onclick="handleBoxOpen('small')" class="w-[72px] h-[72px] object-contain drop-shadow-2xl active:scale-90 group-hover:scale-105 transition-transform">
+                                    <button onclick="showBoxInfo(event, 'small')" title="Kutu Oranları" class="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-slate-900/90 border border-cyan-400 text-cyan-300 text-xs font-black flex items-center justify-center shadow-lg hover:bg-cyan-500 hover:text-white transition active:scale-90 z-10">i</button>
+                                </div>
+                                <div id="smallBoxLabel" class="mt-1 text-center leading-tight w-32"></div>
+                            </div>
+
+                            <!-- Büyük Kutu -->
+                            <div class="flex flex-col items-center">
+                                <div class="relative group cursor-pointer flex items-center justify-center">
+                                    <img src="assets/buyukkutu.png" onclick="handleBoxOpen('big')" class="w-[72px] h-[72px] object-contain drop-shadow-2xl active:scale-90 group-hover:scale-105 transition-transform">
+                                    <button onclick="showBoxInfo(event, 'big')" title="Kutu Oranları" class="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-slate-900/90 border border-pink-400 text-pink-300 text-xs font-black flex items-center justify-center shadow-lg hover:bg-pink-500 hover:text-white transition active:scale-90 z-10">i</button>
+                                </div>
+                                <div id="bigBoxLabel" class="mt-1 text-center leading-tight w-32"></div>
+                            </div>
+                        </div>
+
+                        <button id="startBtn" class="btn-brawl bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-500 text-slate-950 font-salah text-3xl px-12 py-2 rounded-2xl border-2 border-yellow-200 transition active:scale-95">OYNA</button>
+                    </div>
+                </div>
+
+                <!-- KUTU BİLGİ / ORAN MODALI -->
+                <div id="boxInfoModal" class="hidden absolute inset-0 bg-slate-950/90 z-50 flex flex-col items-center justify-center p-4">
+                    <div class="card-bg p-5 rounded-2xl shadow-2xl max-w-xs w-full text-center border-amber-400 relative">
+                        <button id="closeBoxInfoBtn" class="absolute top-3 right-3 text-slate-400 hover:text-white font-bold text-lg px-2">✕</button>
+
+                        <div class="w-20 h-20 mx-auto mb-2">
+                            <img id="infoBoxImg" src="assets/kucukkutu.png" class="w-full h-full object-contain">
+                        </div>
+
+                        <h3 id="infoBoxTitle" class="text-2xl font-salah text-amber-400 mb-1">KÜÇÜK KUTU</h3>
+                        <div id="infoBoxCost" class="inline-block bg-amber-500/20 text-amber-300 border border-amber-400/40 px-3 py-0.5 rounded-full text-xs font-bold mb-3">50 🪙 Jeton</div>
+
+                        <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 text-left space-y-2 text-xs">
+                            <div class="font-bold text-sky-300 border-b border-slate-800 pb-1">DÜŞME ORANLARI & İÇERİK</div>
+                            <div class="flex justify-between items-center text-slate-200">
+                                <span>✨ Yeni Karakter / V2 Kostüm:</span>
+                                <span id="infoBoxChance" class="font-black text-amber-400">%5</span>
+                            </div>
+                            <div class="flex justify-between items-center text-slate-200">
+                                <span>🏆 Karakter Kupası:</span>
+                                <span id="infoBoxTrophies" class="font-black text-emerald-400">+10 Kupa</span>
+                            </div>
+                            <div class="border-t border-slate-800 pt-1.5 text-emerald-300 font-bold" id="infoBoxFree">🎁 Her 50 kupada 1 ücretsiz (günde en fazla 2)</div>
+                        </div>
+
+                        <button onclick="closeBoxInfo()" class="w-full mt-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-salah text-2xl rounded-xl shadow-lg active:scale-95 transition">ANLADIM</button>
+                    </div>
+                </div>
+
+                <!-- KUTU AÇMA ANİMASYON MODALI -->
+                <div id="boxOpeningModal" class="hidden absolute inset-0 bg-slate-950/95 z-50 flex flex-col items-center justify-center p-4">
+                    <div id="boxShakeContainer" class="cursor-pointer flex flex-col items-center justify-center">
+                        <img id="boxModalImg" src="assets/kucukkutu.png" class="w-36 h-36 object-contain mb-4 transition-transform animate-shake">
+                        <div id="boxTapHint" class="text-xl font-salah text-amber-300 tracking-wider animate-bounce">AÇMAK İÇİN DOKUN!</div>
+                    </div>
+
+                    <div id="boxRewardContainer" class="hidden flex flex-col items-center justify-center text-center max-w-xs w-full">
+                        <div id="rewardBadge" class="text-xs font-black bg-amber-500 text-slate-950 px-3 py-1 rounded-full mb-3 uppercase tracking-wider">TEBRİKLER!</div>
+
+                        <div class="w-28 h-28 rounded-2xl border-4 border-amber-400 bg-slate-900 overflow-hidden mb-3 shadow-2xl relative">
+                            <img id="rewardImg" src="" class="w-full h-full object-cover">
+                        </div>
+
+                        <div id="rewardTitle" class="text-3xl font-salah text-yellow-300 leading-tight">+10 KUPA</div>
+                        <div id="rewardSub" class="text-xl font-salah text-sky-300 mb-5">MOHAMED SALAH</div>
+
+                        <button id="closeBoxRewardBtn" class="w-full py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-salah text-2xl rounded-xl shadow-lg active:scale-95 transition">TAMAM</button>
+                    </div>
+                </div>
+
+                <!-- Stars Menüsü -->
+                <div id="starsCard" class="hidden card-bg text-center p-4 rounded-2xl shadow-2xl max-w-xs w-full flex flex-col max-h-[85%] z-30">
+                    <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
+                        <h2 class="text-2xl font-salah text-amber-400 m-0">STARS</h2>
+                        <div class="flex items-center gap-2">
+                            <button id="sortStarsBtn" class="text-xs bg-slate-900 border border-amber-500/50 px-2.5 py-1 rounded-lg text-amber-300 font-bold">Sırala: <span id="sortDirectionText">En Yüksek</span></button>
+                            <button id="closeStarsBtn" class="text-slate-400 hover:text-white font-bold text-lg px-2">✕</button>
+                        </div>
+                    </div>
+                    <div id="starsList" class="space-y-2.5 overflow-y-auto custom-scroll pr-1 my-1"></div>
+                    <div class="pt-2 border-t border-slate-800 mt-2">
+                        <button id="continueStarsBtn" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-salah text-2xl rounded-xl shadow-lg active:scale-95 transition">DEVAM ET</button>
+                    </div>
+                </div>
+
+                <!-- Game Over -->
+                <div id="gameOverCard" class="hidden card-bg text-center p-5 rounded-2xl shadow-2xl max-w-xs w-full z-30">
+                    <h2 class="text-4xl font-salah text-red-500 mb-1 leading-none">KIRMIZI KART!</h2>
+                    <p class="text-[11px] text-slate-400 font-semibold mb-3">Defansa Takıldın</p>
+                    <div class="bg-slate-950/80 rounded-xl p-3 mb-4 border border-slate-800 space-y-1.5">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400 font-semibold text-xs">Kazanılan Karakter Kupası:</span>
+                            <span id="earnedTrophies" class="font-salah text-2xl text-amber-400">+0</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-slate-800 pt-1.5">
+                            <span class="text-slate-400 font-semibold text-xs">Kazanılan Jeton:</span>
+                            <span id="earnedTokens" class="font-salah text-2xl text-purple-400">+0 🪙</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 w-full">
+                        <button id="homeBtn" class="flex-1 py-2.5 bg-slate-800 text-sky-400 border border-sky-500/40 font-salah text-xl rounded-xl active:scale-95 transition">ANA EKRAN</button>
+                        <button id="restartBtn" class="flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 font-salah text-xl rounded-xl active:scale-95 transition">TEKRAR OYNA</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STARS_DATA = [
+            { id: 'salah', name: 'Mohamed Salah', title: 'Trabzonspor 🔴🔵', img: 'images.jpg', img2: 'salah2.jpg', audio: 'salah.mp3', audioStartTime: 12.2, requiredTrophies: 0, pipeColors: { grad1: '#700020', grad2: '#38bdf8', grad3: '#4a0015', border: '#2a000c', cap: '#0284c7' }, celebration1: "ALLAH ALLAH!<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>MOHAMED SALAH!</span>" },
+            { id: 'icardi', name: 'Mauro Icardi', title: 'Galatasaray 🟡🔴', img: 'icardi.jpg', img2: 'icardi2.jpg', audio: 'icardi.mp3', audioStartTime: 44.0, requiredTrophies: 0, pipeColors: { grad1: '#c2410c', grad2: '#ef4444', grad3: '#991b1b', border: '#450a0a', cap: '#eab308' }, celebration1: "AŞKIN OLAYIM!<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>MAURO ICARDI!</span>" },
+            { id: 'quaresma', name: 'Ricardo Quaresma', title: 'Beşiktaş ⚪⚫', img: 'quaresma.jpg', img2: 'quaresma2.jpg', audio: 'quaresma.mp3', audioStartTime: 42.2, requiredTrophies: 0, pipeColors: { grad1: '#18181b', grad2: '#52525b', grad3: '#09090b', border: '#000000', cap: '#ffffff' }, celebration1: "ÇİNGENEM...<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>QUARESMA!</span>" },
+            { id: 'dzeko', name: 'Edin Džeko', title: 'Fenerbahçe 🟡🔵', img: 'dzeko.jpg', img2: 'dzeko2.jpg', audio: 'dzeko.mp3', audioStartTime: 32.2, requiredTrophies: 0, pipeColors: { grad1: '#1e3a8a', grad2: '#facc15', grad3: '#172554', border: '#0f172a', cap: '#fbbf24' }, celebration1: "BENİ SEV<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>EDIN DŽEKO!</span>" },
+            { id: 'muci', name: 'Ernest Muçi', title: 'Trabzonspor 🔴🔵', img: 'muci.jpg', img2: 'muci2.jpg', audio: 'muci.mp3', audioStartTime: 5.0, requiredTrophies: 50, pipeColors: { grad1: '#700020', grad2: '#38bdf8', grad3: '#4a0015', border: '#2a000c', cap: '#0284c7' }, celebration1: "GEL YATIYA<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>ERNEST MUÇİ!</span>" },
+            { id: 'tadic', name: 'Dušan Tadić', title: 'Fenerbahçe 🟡🔵', img: 'tadic.jpg', img2: 'tadic2.jpg', audio: 'tadic.mp3', audioStartTime: 0.0, requiredTrophies: 100, pipeColors: { grad1: '#1e3a8a', grad2: '#facc15', grad3: '#172554', border: '#0f172a', cap: '#fbbf24' }, celebration1: "ON FIRE<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>DUŠAN TADIĆ!</span>" },
+            { id: 'olaitan', name: 'Michael Olaitan', title: 'Beşiktaş ⚪⚫', img: 'olaitan.jpg', img2: 'olaitan2.png', audio: 'olaitan.mp3', audioStartTime: 2.0, requiredTrophies: 150, pipeColors: { grad1: '#18181b', grad2: '#52525b', grad3: '#09090b', border: '#000000', cap: '#ffffff' }, celebration1: "YÜCE AŞK<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>OLAITAN!</span>" },
+            { id: 'noalang', name: 'Noa Lang', title: 'Galatasaray 🟡🔴', img: 'noalang.jpg', img2: 'noalang2.png', audio: 'noalang.mp3', audioStartTime: 0.0, requiredTrophies: 200, pipeColors: { grad1: '#c2410c', grad2: '#ef4444', grad3: '#991b1b', border: '#450a0a', cap: '#eab308' }, celebration1: "DAMAGE<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>NOA LANG!</span>" },
+            { id: 'guler', name: 'Arda Güler', title: 'Real Madrid ⚪', img: 'guler.jpg', img2: 'guler2.jpg', cropY1: 0.5, imgPos1: 'object-center', audio: 'guler.mp3', audioStartTime: 0.0, requiredTrophies: 250, pipeColors: { grad1: '#1e1b4b', grad2: '#6366f1', grad3: '#312e81', border: '#1e1b4b', cap: '#facc15' }, celebration1: "TURKISH TALENT<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>ARDA GÜLER!</span>" },
+            { id: 'alvarez', name: 'Julián Álvarez', title: 'Atlético Madrid 🔴⚪', img: 'alvarez.jpg', img2: 'alvarez2.jpg', audio: 'alvarez.mp3', audioStartTime: 41.0, requiredTrophies: 300, pipeColors: { grad1: '#dc2626', grad2: '#ffffff', grad3: '#991b1b', border: '#450a0a', cap: '#3b82f6' }, celebration1: "ÜÇ KALP<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>ÁLVAREZ!</span>" },
+            { id: 'kimmich', name: 'Joshua Kimmich', title: 'Bayern Münih 🔴⚪', img: 'kimmich.jpg', img2: 'kimmich2.jpg', audio: 'kimmich.mp3', audioStartTime: 10.0, requiredTrophies: 400, pipeColors: { grad1: '#dc2626', grad2: '#ffffff', grad3: '#991b1b', border: '#450a0a', cap: '#dc2626' }, celebration1: "SPIT IN MY FACE!<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>JOSHUA KIMMICH!</span>" },
+            { id: 'yamal', name: 'Lamine Yamal', title: 'Barcelona 🔵🔴', img: 'yamal.jpg', img2: 'yamal2.jpg', audio: 'yamal.mp3', audioStartTime: 0.0, requiredTrophies: 500, pipeColors: { grad1: '#004d98', grad2: '#a50044', grad3: '#002855', border: '#001533', cap: '#edbb00' }, celebration1: "NO LIE!<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>LAMINE YAMAL!</span>" },
+            { id: 'debruyne', name: 'Kevin De Bruyne', title: 'Manchester City 🩵', img: 'bruyne.jpg', img2: 'bruyne2.jpg', audio: 'bruyne.mp3', audioStartTime: 12.0, requiredTrophies: 600, pipeColors: { grad1: '#0284c7', grad2: '#38bdf8', grad3: '#0369a1', border: '#0c4a6e', cap: '#bae6fd' }, celebration1: "LET ME TALK!<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>KEVIN DE BRUYNE!</span>" },
+            { id: 'haaland', name: 'Erling Haaland', title: 'Manchester City 🩵', img: 'haaland.jpg', img2: 'haaland2.jpg', audio: 'haaland.mp3', audioStartTime: 10.0, requiredTrophies: 750, pipeColors: { grad1: '#0284c7', grad2: '#38bdf8', grad3: '#0369a1', border: '#0c4a6e', cap: '#bae6fd' }, celebration1: "HAALAND HA HA HA!<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>ERLING HAALAND!</span>" },
+            { id: 'mbappe', name: 'Kylian Mbappé', title: 'Fransa 🇫🇷', img: 'mbappe.jpg', img2: 'mbappe2.jpg', cropY2: 0.5, imgPos2: 'object-center', audio: 'mbappe.mp3', audioStartTime: 60.0, requiredTrophies: 900, pipeColors: { grad1: '#1e3a8a', grad2: '#3b82f6', grad3: '#172554', border: '#0f172a', cap: '#ef4444' }, celebration1: "FRANCE WC 2018<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>KYLIAN MBAPPÉ!</span>" },
+            { id: 'neymar', name: 'Neymar Jr', title: 'Barcelona 🔵🔴', img: 'neymar.jpg', img2: 'neymar2.jpg', audio: 'neymar.mp3', audioStartTime: 3.0, requiredTrophies: 1100, pipeColors: { grad1: '#004d98', grad2: '#a50044', grad3: '#002855', border: '#001533', cap: '#edbb00' }, celebration1: "TCHÊ TCHÊ RERÊ<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>NEYMAR JR!</span>" },
+            { id: 'messi', name: 'Lionel Messi', title: 'Barcelona 🔵🔴', img: 'messi.jpg', img2: 'messi2.jpg', audio: 'messi.mp3', audioStartTime: 0.0, requiredTrophies: 1250, pipeColors: { grad1: '#004d98', grad2: '#a50044', grad3: '#002855', border: '#001533', cap: '#edbb00' }, celebration1: "MUCHACHOS<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>LIONEL MESSI!</span>" },
+            { id: 'ronaldo', name: 'Cristiano Ronaldo', title: 'Manchester United 🔴', img: 'ronaldo.jpg', img2: 'ronaldo2.jpg', cropY2: 0.75, imgPos2: 'object-bottom', audio: 'ronaldo.mp3', audioStartTime: 0.0, requiredTrophies: 1500, pipeColors: { grad1: '#da020e', grad2: '#ffe500', grad3: '#990000', border: '#4a0000', cap: '#000000' }, celebration1: "SIUUUUU!<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>CR7!</span>" },
+            { id: 'tantunispor', name: 'Tantunispor', title: 'Özel Karakter ⭐', img: 'tantunispor.jpg', img2: 'tantunispor2.jpg', audio: 'tantunispor.mp3', audioStartTime: 0.0, requiredTrophies: 1650, pipeColors: { grad1: '#7c2d12', grad2: '#f97316', grad3: '#431407', border: '#1c0a03', cap: '#facc15' }, celebration1: "GOOOOL!<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>TANTUNISPOR!</span>" },
+            { id: 'umidi', name: 'Umidi', title: 'Özel Karakter ⭐', img: 'umidi.jpg', img2: 'umidi2.jpg', audio: 'umidi.mp3', audioStartTime: 0.0, requiredTrophies: 1800, pipeColors: { grad1: '#713f12', grad2: '#facc15', grad3: '#422006', border: '#1c1004', cap: '#18181b' }, celebration1: "GOOOOL!<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>UMIDI!</span>" },
+            { id: 'caylar', name: 'Caylar', title: 'Özel Karakter ⭐', img: 'caylar.jpg', img2: 'caylar2.jpg', audio: 'caylar.mp3', audioStartTime: 0.0, requiredTrophies: 1950, pipeColors: { grad1: '#14532d', grad2: '#4ade80', grad3: '#052e16', border: '#022c22', cap: '#a16207' }, celebration1: "GOOOOL!<br><span class='text-yellow-300 text-xl font-extrabold tracking-wider'>CAYLAR!</span>" }
+        ];
+
+        // Stars listesinde tek satıra sığsın diye kısa isimler
+        const SHORT_NAMES = {
+            salah: 'Mo Salah',
+            mbappe: 'K. Mbappé',
+            debruyne: 'KDB',
+            messi: 'Leo Messi',
+            yamal: 'L. Yamal',
+            quaresma: 'R. Quaresma',
+            olaitan: 'Olaitan JR',
+            neymar: 'Neymar JR',
+            ronaldo: 'C. Ronaldo',
+            alvarez: 'J. Álvarez',
+            kimmich: 'J. Kimmich',
+            haaland: 'E. Haaland'
+        };
+
+        const stage = document.getElementById('stage');
+        const gameWrap = document.getElementById('gameWrap');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+        const uiOverlay = document.getElementById('uiOverlay');
+        const nameCard = document.getElementById('nameCard');
+        const settingsCard = document.getElementById('settingsCard');
+        const startCard = document.getElementById('startCard');
+        const starsCard = document.getElementById('starsCard');
+        const gameOverCard = document.getElementById('gameOverCard');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const openStarsBtn = document.getElementById('openStarsBtn');
+        const closeStarsBtn = document.getElementById('closeStarsBtn');
+        const continueStarsBtn = document.getElementById('continueStarsBtn');
+        const sortStarsBtn = document.getElementById('sortStarsBtn');
+        const sortDirectionText = document.getElementById('sortDirectionText');
+        const openSettingsBtn = document.getElementById('openSettingsBtn');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const profileClickArea = document.getElementById('profileClickArea');
+        const saveNameBtn = document.getElementById('saveNameBtn');
+        const usernameInput = document.getElementById('usernameInput');
+        const displayUsername = document.getElementById('displayUsername');
+        const headerAvatarImg = document.getElementById('headerAvatarImg');
+        const headerTokensText = document.getElementById('headerTokensText');
+        const totalTrophiesText = document.getElementById('totalTrophiesText');
+        const highScoreText = document.getElementById('highScoreText');
+        const characterTrophies = document.getElementById('characterTrophies');
+        const topLobbyHeader = document.getElementById('topLobbyHeader');
+        const leftLobbyMenu = document.getElementById('leftLobbyMenu');
+        const earnedTrophies = document.getElementById('earnedTrophies');
+        const earnedTokens = document.getElementById('earnedTokens');
+        const salahCelebration = document.getElementById('salahCelebration');
+        const starsList = document.getElementById('starsList');
+        const activeStarImg = document.getElementById('activeStarImg');
+        const activeStarName = document.getElementById('activeStarName');
+        const activeStarTitle = document.getElementById('activeStarTitle');
+        const prevFormBtn = document.getElementById('prevFormBtn');
+        const nextFormBtn = document.getElementById('nextFormBtn');
+        const skinUnlockContainer = document.getElementById('skinUnlockContainer');
+        const charLockInfo = document.getElementById('charLockInfo');
+        const charLockProgress = document.getElementById('charLockProgress');
+        const unlockBtnText = document.getElementById('unlockBtnText');
+        const unlockBtnCost = document.getElementById('unlockBtnCost');
+        const dotForm1 = document.getElementById('dotForm1');
+        const dotForm2 = document.getElementById('dotForm2');
+        const musicVolumeSlider = document.getElementById('musicVolumeSlider');
+        const sfxVolumeSlider = document.getElementById('sfxVolumeSlider');
+        const toggleMusicBtn = document.getElementById('toggleMusicBtn');
+        const toggleSfxBtn = document.getElementById('toggleSfxBtn');
+        const toggleVibrationBtn = document.getElementById('toggleVibrationBtn');
+        const resetDataBtn = document.getElementById('resetDataBtn');
+
+        // Durdurma menüsü
+        const pauseBtn = document.getElementById('pauseBtn');
+        const pauseOverlay = document.getElementById('pauseOverlay');
+        const pauseScore = document.getElementById('pauseScore');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const pauseRestartBtn = document.getElementById('pauseRestartBtn');
+        const pauseMusicBtn = document.getElementById('pauseMusicBtn');
+        const pauseSfxBtn = document.getElementById('pauseSfxBtn');
+        const quitBtn = document.getElementById('quitBtn');
+
+        // Kutu Açma & Bilgi Elemanları
+        const boxOpeningModal = document.getElementById('boxOpeningModal');
+        const boxShakeContainer = document.getElementById('boxShakeContainer');
+        const boxModalImg = document.getElementById('boxModalImg');
+        const boxTapHint = document.getElementById('boxTapHint');
+        const boxRewardContainer = document.getElementById('boxRewardContainer');
+        const rewardBadge = document.getElementById('rewardBadge');
+        const rewardImg = document.getElementById('rewardImg');
+        const rewardTitle = document.getElementById('rewardTitle');
+        const rewardSub = document.getElementById('rewardSub');
+        const closeBoxRewardBtn = document.getElementById('closeBoxRewardBtn');
+
+        const boxInfoModal = document.getElementById('boxInfoModal');
+        const infoBoxImg = document.getElementById('infoBoxImg');
+        const infoBoxTitle = document.getElementById('infoBoxTitle');
+        const infoBoxCost = document.getElementById('infoBoxCost');
+        const infoBoxChance = document.getElementById('infoBoxChance');
+        const infoBoxTrophies = document.getElementById('infoBoxTrophies');
+        const infoBoxFree = document.getElementById('infoBoxFree');
+        const closeBoxInfoBtn = document.getElementById('closeBoxInfoBtn');
+        const smallBoxLabel = document.getElementById('smallBoxLabel');
+        const bigBoxLabel = document.getElementById('bigBoxLabel');
+
+        const GAME_WIDTH = 400;
+        const GAME_HEIGHT = 580;
+        let dpr = 1;
+        let viewScale = 1;
+        let sortHighestFirst = true;
+
+        // Perf Caches
+        let cachedSkyGrad = null;
+        let cachedPipeGrad = null;
+        let cachedPipeColorsKey = '';
+
+        function getStoredData(key, fallback) { try { return localStorage.getItem(key) || fallback; } catch (e) { return fallback; } }
+        function setStoredData(key, val) { try { localStorage.setItem(key, val.toString()); } catch (e) {} }
+
+        function getStarTrophies(starId) {
+            let val = localStorage.getItem(`fs_star_trophies_${starId}`);
+            if (val === null && starId === 'salah') {
+                val = localStorage.getItem('fs_trophies') || localStorage.getItem('salah_high_score') || '0';
+                localStorage.setItem(`fs_star_trophies_salah`, val);
+            }
+            return parseInt(val || '0', 10);
+        }
+
+        function getStarForm(starId) { return parseInt(getStoredData(`fs_star_form_${starId}`, '1'), 10); }
+        function setStarForm(starId, formNum) { setStoredData(`fs_star_form_${starId}`, formNum); }
+
+        function isStarUnlocked(star) {
+            return totalTrophies >= star.requiredTrophies || getStoredData(`fs_unlocked_${star.id}`, 'false') === 'true';
+        }
+
+        function isStarV2Unlocked(star) {
+            return getStarTrophies(star.id) >= 200 || getStoredData(`fs_v2_unlocked_${star.id}`, 'false') === 'true';
+        }
+
+        function calculateTotalTrophies() {
+            let total = 0;
+            STARS_DATA.forEach(star => { total += getStarTrophies(star.id); });
+            return total;
+        }
+
+        let username = getStoredData('fs_username', '');
+        let selectedAvatar = getStoredData('fs_user_avatar', 'ts.jpg');
+        let selectedStarId = getStoredData('fs_selected_star', 'salah');
+        let highScore = parseInt(getStoredData('fs_high_score', '0'), 10);
+        let jetons = parseInt(getStoredData('fs_jetons', '0'), 10);
+        let totalTrophies = calculateTotalTrophies();
+
+        let musicVolume = parseFloat(getStoredData('fs_music_vol', '1.0'));
+        let isMusicMuted = getStoredData('fs_music_muted', 'false') === 'true';
+        let sfxVolume = parseFloat(getStoredData('fs_sfx_vol', '1.0'));
+        let isSfxMuted = getStoredData('fs_sfx_muted', 'false') === 'true';
+        let isVibrationEnabled = getStoredData('fs_vibe_enabled', 'true') === 'true';
+        let currentDifficulty = getStoredData('fs_difficulty', 'normal');
+
+        let PIPE_GAP = 148;
+        let PIPE_SPEED = 2.4;
+        let PIPE_SPAWN_INTERVAL = 1.35;
+
+        function applyDifficultySettings() {
+            if (currentDifficulty === 'easy') {
+                PIPE_GAP = 165; PIPE_SPEED = 2.0; PIPE_SPAWN_INTERVAL = 1.6;
+            } else if (currentDifficulty === 'hard') {
+                PIPE_GAP = 132; PIPE_SPEED = 2.9; PIPE_SPAWN_INTERVAL = 1.1;
+            } else {
+                PIPE_GAP = 148; PIPE_SPEED = 2.4; PIPE_SPAWN_INTERVAL = 1.35;
+            }
+
+            ['easy', 'normal', 'hard'].forEach(d => {
+                const btn = document.getElementById(`diff_${d}`);
+                if (btn) {
+                    if (d === currentDifficulty) {
+                        btn.className = "text-[10px] font-bold py-1 border border-amber-500 rounded bg-amber-500 text-slate-950 shadow";
+                    } else {
+                        btn.className = "text-[10px] font-bold py-1 border border-slate-700 rounded bg-slate-800 text-slate-400";
+                    }
+                }
+            });
+        }
+
+        window.setDifficulty = function(diff) {
+            currentDifficulty = diff;
+            setStoredData('fs_difficulty', diff);
+            applyDifficultySettings();
+        };
+
+        function triggerVibration(ms = 30) {
+            if (isVibrationEnabled && navigator.vibrate) {
+                navigator.vibrate(ms);
+            }
+        }
+
+        let currentAudio = new Audio();
+        let starImage = new Image();
+        let isStarImgLoaded = false;
+
+        const ON_CLASS = 'text-xs px-2.5 py-1 bg-emerald-950/80 border border-emerald-700 rounded-lg font-bold text-emerald-400';
+        const OFF_CLASS = 'text-xs px-2.5 py-1 bg-red-950/80 border border-red-700 rounded-lg font-bold text-red-400';
+
+        function applyAudioSettings() {
+            currentAudio.volume = isMusicMuted ? 0 : musicVolume;
+            musicVolumeSlider.value = musicVolume * 100;
+            toggleMusicBtn.textContent = isMusicMuted ? 'KAPALI' : 'AÇIK';
+            toggleMusicBtn.className = isMusicMuted ? OFF_CLASS : ON_CLASS;
+
+            sfxVolumeSlider.value = sfxVolume * 100;
+            toggleSfxBtn.textContent = isSfxMuted ? 'KAPALI' : 'AÇIK';
+            toggleSfxBtn.className = isSfxMuted ? OFF_CLASS : ON_CLASS;
+
+            toggleVibrationBtn.textContent = isVibrationEnabled ? 'AÇIK' : 'KAPALI';
+            toggleVibrationBtn.className = isVibrationEnabled ? ON_CLASS : OFF_CLASS;
+
+            // Durdurma menüsündeki kısayol butonları
+            pauseMusicBtn.textContent = '🎵 Müzik: ' + (isMusicMuted ? 'KAPALI' : 'AÇIK');
+            pauseMusicBtn.className = 'py-1.5 text-[11px] font-bold rounded-lg border ' + (isMusicMuted ? 'bg-red-950/80 border-red-700 text-red-400' : 'bg-emerald-950/80 border-emerald-700 text-emerald-400');
+            pauseSfxBtn.textContent = '🔊 Efekt: ' + (isSfxMuted ? 'KAPALI' : 'AÇIK');
+            pauseSfxBtn.className = 'py-1.5 text-[11px] font-bold rounded-lg border ' + (isSfxMuted ? 'bg-red-950/80 border-red-700 text-red-400' : 'bg-emerald-950/80 border-emerald-700 text-emerald-400');
+        }
+
+        toggleVibrationBtn.addEventListener('click', () => {
+            isVibrationEnabled = !isVibrationEnabled;
+            setStoredData('fs_vibe_enabled', isVibrationEnabled);
+            if (isVibrationEnabled) triggerVibration(50);
+            applyAudioSettings();
+        });
+
+        resetDataBtn.addEventListener('click', () => {
+            if (confirm("Tüm kupalar, jetonlar ve ayarlar sıfırlanacak. Emin misin?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        });
+
+        // Sadece V2 skinleri jetonla açılır. Karakterler jetonla AÇILMAZ.
+        window.buyCurrentSkin = function() {
+            const star = STARS_DATA.find(s => s.id === selectedStarId);
+            if (!star) return;
+
+            if (!isStarUnlocked(star)) return; // kilitli karakter jetonla açılmaz
+
+            const formNum = getStarForm(star.id);
+            if (formNum !== 2) return;
+
+            if (isStarV2Unlocked(star)) {
+                alert("Bu V2 skini zaten açık!");
+                return;
+            }
+
+            const cost = 400;
+            if (jetons < cost) {
+                alert(`Yetersiz Jeton! V2 skinini açmak için ${cost} 🪙 gerekiyor. (Mevcut: ${jetons} 🪙)`);
+                return;
+            }
+
+            if (confirm(`${star.name} V2 skinini ${cost} 🪙 karşılığında açmak istiyor musunuz?`)) {
+                jetons -= cost;
+                setStoredData('fs_jetons', jetons);
+                setStoredData(`fs_v2_unlocked_${star.id}`, 'true');
+
+                sounds.playFanfare();
+                triggerVibration(100);
+                loadSelectedStar();
+                updateUI();
+                if (!starsCard.classList.contains('hidden')) {
+                    renderStarsList();
+                }
+            }
+        };
+
+        function loadSelectedStar() {
+            const star = STARS_DATA.find(s => s.id === selectedStarId) || STARS_DATA[0];
+            const currentStarTrophies = getStarTrophies(star.id);
+            const baseUnlocked = isStarUnlocked(star);
+
+            // Karakter kapalıysa kesinlikle V1 formuna zorla
+            if (!baseUnlocked) {
+                setStarForm(star.id, 1);
+            }
+
+            let formNum = getStarForm(star.id);
+            const v2Unlocked = isStarV2Unlocked(star);
+
+            const activeImgSrc = (formNum === 2 && star.img2) ? star.img2 : star.img;
+            const activeImgPos = (formNum === 2 && star.imgPos2) ? star.imgPos2 : (star.imgPos1 || 'object-top');
+
+            activeStarImg.src = activeImgSrc;
+            activeStarImg.className = `w-full h-full object-cover ${activeImgPos}`;
+            activeStarTitle.textContent = star.title;
+
+            // Kilitli karakterde toplam kupa / gereken kupa; açıkta karakterin kendi kupası
+            characterTrophies.textContent = baseUnlocked ? currentStarTrophies : `${calculateTotalTrophies()} / ${star.requiredTrophies}`;
+
+            isStarImgLoaded = false;
+            starImage.onload = () => { isStarImgLoaded = true; };
+            starImage.src = activeImgSrc;
+            if (starImage.complete) { isStarImgLoaded = true; }
+
+            if (formNum === 2) {
+                dotForm1.className = "w-2.5 h-2.5 rounded-full bg-slate-600 transition-all cursor-pointer";
+                dotForm2.className = "w-2.5 h-2.5 rounded-full bg-amber-400 scale-125 transition-all shadow-md cursor-pointer";
+                activeStarName.textContent = (star.name + ' V2').toUpperCase();
+            } else {
+                dotForm1.className = "w-2.5 h-2.5 rounded-full bg-amber-400 scale-125 transition-all shadow-md cursor-pointer";
+                dotForm2.className = "w-2.5 h-2.5 rounded-full bg-slate-600 transition-all cursor-pointer";
+                activeStarName.textContent = star.name.toUpperCase();
+            }
+
+            // Kilit bilgisi / V2 butonu görünürlüğü
+            if (!baseUnlocked) {
+                skinUnlockContainer.classList.add('hidden');
+                charLockInfo.classList.remove('hidden');
+                charLockProgress.textContent = `${calculateTotalTrophies()} / ${star.requiredTrophies} 🏆`;
+            } else if (formNum === 2 && !v2Unlocked) {
+                charLockInfo.classList.add('hidden');
+                skinUnlockContainer.classList.remove('hidden');
+                unlockBtnText.textContent = "🔓 V2 SKİNİ AÇ:";
+                unlockBtnCost.textContent = "400 🪙";
+            } else {
+                charLockInfo.classList.add('hidden');
+                skinUnlockContainer.classList.add('hidden');
+            }
+
+            cachedPipeGrad = null;
+            cachedPipeColorsKey = '';
+
+            currentAudio.src = star.audio;
+            applyAudioSettings();
+            currentAudio.onended = function() {
+                if (gameState === 'PLAYING') {
+                    this.currentTime = star.audioStartTime;
+                    this.play().catch(e => {});
+                }
+            };
+        }
+
+        function toggleStarForm() {
+            const star = STARS_DATA.find(s => s.id === selectedStarId);
+            if (!star) return;
+
+            if (!isStarUnlocked(star)) {
+                alert("Önce karakterin kendisini açmalısın!");
+                return;
+            }
+
+            let currentForm = getStarForm(selectedStarId);
+            let newForm = currentForm === 1 ? 2 : 1;
+            setStarForm(selectedStarId, newForm);
+            triggerVibration(20);
+            loadSelectedStar();
+        }
+
+        window.selectFormFromDot = function(formNum) {
+            const star = STARS_DATA.find(s => s.id === selectedStarId);
+            if (!star) return;
+
+            if (formNum === 2 && !isStarUnlocked(star)) {
+                alert("Önce karakterin kendisini açmalısın!");
+                return;
+            }
+
+            setStarForm(selectedStarId, formNum);
+            triggerVibration(20);
+            loadSelectedStar();
+        };
+
+        prevFormBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleStarForm(); });
+        nextFormBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleStarForm(); });
+
+        function applyBgLogo() {
+            ['bgLogo', 'bgLogoTop', 'bgLogoBottom'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.backgroundImage = `url("${selectedAvatar}")`;
+            });
+        }
+
+        // PC'de yanlarda büyük logo, telefonda (üst/alt boşluk varsa) iki şeritte logo
+        function layoutBgLogo() {
+            const stageW = GAME_WIDTH * viewScale, stageH = GAME_HEIGHT * viewScale;
+            const sideW = (window.innerWidth - stageW) / 2;
+            const barH = (window.innerHeight - stageH) / 2;
+            const barsMode = barH >= 48 && barH > sideW;
+            const big = document.getElementById('bgLogo');
+            if (big) big.style.display = barsMode ? 'none' : 'block';
+            ['bgLogoTop', 'bgLogoBottom'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.style.display = barsMode ? 'block' : 'none';
+                el.style.height = `${barH}px`;
+            });
+        }
+
+        window.selectAvatar = function(imgSrc) {
+            selectedAvatar = imgSrc;
+            applyBgLogo();
+            document.querySelectorAll('.avatar-option').forEach(el => {
+                el.classList.remove('border-amber-400', 'ring-2', 'ring-amber-400');
+                el.classList.add('border-slate-700');
+            });
+            const activeOption = document.querySelector(`.avatar-option[data-avatar="${imgSrc}"]`);
+            if (activeOption) {
+                activeOption.classList.remove('border-slate-700');
+                activeOption.classList.add('border-amber-400', 'ring-2', 'ring-amber-400');
+            }
+        };
+
+        // ===== BEDAVA KUTU SİSTEMİ =====
+        // Küçük kutu: her 50 toplam kupada 1 bedava, günde en fazla 2
+        // Büyük kutu: her 300 toplam kupada 1 bedava, günde en fazla 1
+        const FREE_BOX_RULES = {
+            small: { step: 50, daily: 2, cost: 50 },
+            big: { step: 300, daily: 1, cost: 300 }
+        };
+
+        function todayKey() {
+            const d = new Date();
+            return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+        }
+
+        function getFreeBoxInfo(type) {
+            const rule = FREE_BOX_RULES[type];
+            const total = calculateTotalTrophies();
+            const usedToday = getStoredData(`fs_free_${type}_day`, '') === todayKey()
+                ? parseInt(getStoredData(`fs_free_${type}_today`, '0'), 10) : 0;
+            const claimed = parseInt(getStoredData(`fs_free_${type}_claimed`, '0'), 10);
+            const stock = Math.max(0, Math.floor(total / rule.step) - claimed);
+            const left = Math.max(0, rule.daily - usedToday);
+            return {
+                rule, total, usedToday, claimed, stock, left,
+                progress: total % rule.step,
+                canClaim: stock > 0 && left > 0
+            };
+        }
+
+        function consumeFreeBox(type) {
+            const info = getFreeBoxInfo(type);
+            setStoredData(`fs_free_${type}_day`, todayKey());
+            setStoredData(`fs_free_${type}_today`, info.usedToday + 1);
+            setStoredData(`fs_free_${type}_claimed`, info.claimed + 1);
+        }
+
+        const COIN_SVG = '<svg width="15" height="15" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7.3" fill="#f59e0b" stroke="#fcd34d" stroke-width="1"/><circle cx="8" cy="8" r="4.8" fill="none" stroke="#b45309" stroke-width="1"/><rect x="5.9" y="5.4" width="1.1" height="5.2" fill="#b45309"/><rect x="9" y="5.4" width="1.1" height="5.2" fill="#b45309"/></svg>';
+        const CLOCK_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.5V12l3.5 2"/></svg>';
+
+        function renderBoxLabel(el, type) {
+            const info = getFreeBoxInfo(type);
+            const cost = info.rule.cost;
+            const pillBase = 'mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold whitespace-nowrap';
+            let priceHtml, pillHtml;
+
+            if (info.canClaim) {
+                priceHtml = `<span class="line-through opacity-50">${cost}</span>${COIN_SVG}`;
+                pillHtml = `<div class="${pillBase} border-emerald-400 bg-emerald-950/70 text-emerald-300 animate-pulse">🎁 ÜCRETSİZ · kalan ${info.left}</div>`;
+            } else if (info.stock > 0) {
+                priceHtml = `<span>${cost}</span>${COIN_SVG}`;
+                pillHtml = `<div class="${pillBase} border-cyan-400/80 bg-slate-950/80 text-sky-100" style="box-shadow:0 0 8px rgba(34,211,238,.5)">${CLOCK_SVG}Yarın yenilenecek</div>`;
+            } else {
+                priceHtml = `<span>${cost}</span>${COIN_SVG}`;
+                pillHtml = `<div class="${pillBase} border-slate-600 bg-slate-800/70 text-slate-400">Ücretsiz: <span class="text-slate-100">${info.progress}/${info.rule.step}</span> 🏆</div>`;
+            }
+
+            el.innerHTML = `<div class="flex items-center justify-center gap-1 font-black text-[15px] leading-none text-purple-300">${priceHtml}</div>${pillHtml}`;
+        }
+
+        function updateBoxLabels() {
+            renderBoxLabel(smallBoxLabel, 'small');
+            renderBoxLabel(bigBoxLabel, 'big');
+        }
+
+        function updateUI() {
+            displayUsername.textContent = username ? username.toUpperCase() : 'OYUNCU';
+            headerAvatarImg.src = selectedAvatar;
+            applyBgLogo();
+            totalTrophies = calculateTotalTrophies();
+            totalTrophiesText.textContent = totalTrophies;
+            highScoreText.textContent = highScore;
+            headerTokensText.textContent = jetons;
+            updateBoxLabels();
+
+            if (!username) {
+                nameCard.classList.remove('hidden');
+                startCard.classList.add('hidden');
+                topLobbyHeader.classList.add('hidden');
+                leftLobbyMenu.classList.add('hidden');
+                selectAvatar(selectedAvatar);
+            } else {
+                nameCard.classList.add('hidden');
+                startCard.classList.remove('hidden');
+                topLobbyHeader.classList.remove('hidden');
+                leftLobbyMenu.classList.remove('hidden');
+            }
+        }
+
+        profileClickArea.addEventListener('click', (e) => {
+            e.stopPropagation();
+            usernameInput.value = username;
+            selectAvatar(selectedAvatar);
+            nameCard.classList.remove('hidden');
+            startCard.classList.add('hidden');
+            starsCard.classList.add('hidden');
+            settingsCard.classList.add('hidden');
+            gameOverCard.classList.add('hidden');
+        });
+
+        openSettingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            applyAudioSettings();
+            applyDifficultySettings();
+            settingsCard.classList.remove('hidden');
+            startCard.classList.add('hidden');
+            starsCard.classList.add('hidden');
+            nameCard.classList.add('hidden');
+            gameOverCard.classList.add('hidden');
+        });
+
+        closeSettingsBtn.addEventListener('click', () => {
+            settingsCard.classList.add('hidden');
+            startCard.classList.remove('hidden');
+        });
+
+        musicVolumeSlider.addEventListener('input', (e) => {
+            musicVolume = e.target.value / 100;
+            setStoredData('fs_music_vol', musicVolume);
+            if (musicVolume > 0 && isMusicMuted) { isMusicMuted = false; setStoredData('fs_music_muted', 'false'); }
+            applyAudioSettings();
+        });
+
+        function toggleMusic() {
+            isMusicMuted = !isMusicMuted;
+            setStoredData('fs_music_muted', isMusicMuted);
+            applyAudioSettings();
+        }
+        function toggleSfx() {
+            isSfxMuted = !isSfxMuted;
+            setStoredData('fs_sfx_muted', isSfxMuted);
+            applyAudioSettings();
+        }
+        toggleMusicBtn.addEventListener('click', toggleMusic);
+        toggleSfxBtn.addEventListener('click', toggleSfx);
+        pauseMusicBtn.addEventListener('click', toggleMusic);
+        pauseSfxBtn.addEventListener('click', toggleSfx);
+
+        sfxVolumeSlider.addEventListener('input', (e) => {
+            sfxVolume = e.target.value / 100;
+            setStoredData('fs_sfx_vol', sfxVolume);
+            if (sfxVolume > 0 && isSfxMuted) { isSfxMuted = false; setStoredData('fs_sfx_muted', 'false'); }
+            applyAudioSettings();
+        });
+
+        saveNameBtn.addEventListener('click', () => {
+            const inputVal = usernameInput.value.trim();
+            if (inputVal.length > 0) {
+                username = inputVal;
+                setStoredData('fs_username', username);
+                setStoredData('fs_user_avatar', selectedAvatar);
+                updateUI();
+            }
+        });
+
+        function renderStarsList() {
+            starsList.innerHTML = '';
+            totalTrophies = calculateTotalTrophies();
+            let sortedStars = STARS_DATA.map(star => ({ ...star, trophies: getStarTrophies(star.id) }));
+            sortedStars.sort((a, b) => {
+                const ua = isStarUnlocked(a), ub = isStarUnlocked(b);
+                if (ua !== ub) return ua ? -1 : 1; // açık olanlar her zaman üstte
+                if (!ua) return a.requiredTrophies - b.requiredTrophies; // kilitliler: en yakın hedef üstte
+                return sortHighestFirst ? b.trophies - a.trophies : a.trophies - b.trophies;
+            });
+            sortDirectionText.textContent = sortHighestFirst ? 'En Yüksek' : 'En Düşük';
+
+            sortedStars.forEach(star => {
+                const isSelected = star.id === selectedStarId;
+                const unlocked = isStarUnlocked(star);
+                const v2Unlocked = isStarV2Unlocked(star);
+                const currentForm = getStarForm(star.id);
+                const displayImg = (v2Unlocked && currentForm === 2 && star.img2) ? star.img2 : star.img;
+                const displayImgPos = (v2Unlocked && currentForm === 2 && star.imgPos2) ? star.imgPos2 : (star.imgPos1 || 'object-top');
+
+                const card = document.createElement('div');
+                card.className = `flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition ${isSelected ? 'bg-sky-900/40 border-amber-400' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'}`;
+
+                card.onclick = (e) => {
+                    if (!e.target.dataset.formBtn) selectStar(star.id);
+                };
+
+                const trophyText = unlocked
+                    ? `${star.trophies}`
+                    : `${totalTrophies} / <span class="text-slate-400">${star.requiredTrophies}</span>`;
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full overflow-hidden border border-white/20 bg-slate-800 flex-shrink-0 relative">
+                            <img src="${displayImg}" class="w-full h-full object-cover ${displayImgPos}">
+                        </div>
+                        <div class="text-left">
+                            <div class="font-salah text-lg leading-tight text-white flex items-center gap-1">${SHORT_NAMES[star.id] || star.name} ${unlocked && v2Unlocked && currentForm === 2 ? '<span class="text-xs text-amber-400 font-bold">V2</span>' : ''}</div>
+                            <div class="text-[10px] text-sky-400 font-bold">${star.title}</div>
+                            <div class="text-[11px] text-amber-300 font-bold">Kupa: ${trophyText} 🏆</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end gap-1.5">
+                        ${isSelected ? `<span class="text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 px-3 py-1 rounded-lg">SEÇİLDİ</span>` : unlocked ? `<button onclick="selectStar('${star.id}')" class="text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white px-3 py-1 rounded-lg">SEÇ</button>` : `<button onclick="selectStar('${star.id}')" class="text-xs font-bold bg-amber-500 text-slate-950 px-3 py-1 rounded-lg border border-amber-300">🔒 İNCELE</button>`}
+                        ${unlocked ? (v2Unlocked ? `
+                            <div class="flex items-center gap-1 mt-0.5">
+                                <button data-form-btn="true" onclick="changeStarForm(event, '${star.id}', 1)" class="text-[10px] font-bold px-2 py-0.5 rounded border ${currentForm === 1 ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-800 text-slate-400 border-slate-700'}">V1</button>
+                                <button data-form-btn="true" onclick="changeStarForm(event, '${star.id}', 2)" class="text-[10px] font-bold px-2 py-0.5 rounded border ${currentForm === 2 ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-800 text-slate-400 border-slate-700'}">V2</button>
+                            </div>
+                        ` : `
+                            <div class="flex items-center gap-1 mt-0.5">
+                                <button data-form-btn="true" onclick="selectStar('${star.id}'); setStarForm('${star.id}', 2); loadSelectedStar();" class="text-[10px] font-bold px-2 py-0.5 rounded border bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-300 shadow active:scale-95 transition">🔒 V2 (400 🪙)</button>
+                            </div>
+                        `) : ''}
+                    </div>
+                `;
+                starsList.appendChild(card);
+            });
+        }
+
+        window.changeStarForm = function(event, id, formNum) {
+            event.stopPropagation();
+            const star = STARS_DATA.find(s => s.id === id);
+            if (star && !isStarUnlocked(star)) {
+                alert("Önce karakterin kendisini açmalısın!");
+                return;
+            }
+            setStarForm(id, formNum);
+            selectStar(id);
+        };
+
+        sortStarsBtn.addEventListener('click', () => {
+            sortHighestFirst = !sortHighestFirst;
+            renderStarsList();
+        });
+
+        window.selectStar = function(id) {
+            selectedStarId = id;
+            setStoredData('fs_selected_star', id);
+            loadSelectedStar();
+            renderStarsList();
+        };
+
+        openStarsBtn.addEventListener('click', () => { renderStarsList(); startCard.classList.add('hidden'); starsCard.classList.remove('hidden'); });
+        closeStarsBtn.addEventListener('click', () => { starsCard.classList.add('hidden'); startCard.classList.remove('hidden'); });
+        continueStarsBtn.addEventListener('click', () => { starsCard.classList.add('hidden'); startCard.classList.remove('hidden'); });
+
+        // Oyun alanı sabit 400x580 mantıksal boyutta; ekrana sığacak şekilde tamamen ölçeklenir.
+        function resizeCanvas() {
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const padding = window.innerWidth < 640 ? 8 : 16;
+            const availableWidth = Math.max(100, window.innerWidth - padding);
+            const availableHeight = Math.max(100, window.innerHeight - padding);
+
+            viewScale = Math.min(availableWidth / GAME_WIDTH, availableHeight / GAME_HEIGHT);
+
+            stage.style.width = `${GAME_WIDTH * viewScale}px`;
+            stage.style.height = `${GAME_HEIGHT * viewScale}px`;
+            gameWrap.style.transform = `scale(${viewScale})`;
+
+            // Canvas iç çözünürlüğü ölçeğe göre artar, büyük ekranda bulanıklaşmaz
+            const res = Math.min(viewScale * dpr, 3);
+            canvas.style.width = `${GAME_WIDTH}px`;
+            canvas.style.height = `${GAME_HEIGHT}px`;
+            canvas.width = Math.round(GAME_WIDTH * res);
+            canvas.height = Math.round(GAME_HEIGHT * res);
+            ctx.resetTransform();
+            ctx.scale(canvas.width / GAME_WIDTH, canvas.height / GAME_HEIGHT);
+
+            cachedSkyGrad = ctx.createLinearGradient(0, 0, 0, GAME_HEIGHT);
+            cachedSkyGrad.addColorStop(0, '#020617');
+            cachedSkyGrad.addColorStop(0.6, '#0f172a');
+            cachedSkyGrad.addColorStop(1, '#064e3b');
+            cachedPipeGrad = null;
+            layoutBgLogo();
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class SoundEffects {
+            constructor() { this.ctx = null; }
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+            }
+            playKick() {
+                if (!this.ctx || isSfxMuted || sfxVolume <= 0) return;
+                const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(260, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(450, this.ctx.currentTime + 0.07);
+                gain.gain.setValueAtTime(0.35 * sfxVolume, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.07);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.07);
+            }
+            playGoal() {
+                if (!this.ctx || isSfxMuted || sfxVolume <= 0) return;
+                const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1800, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2 * sfxVolume, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.15);
+            }
+            playWhistle() {
+                if (!this.ctx || isSfxMuted || sfxVolume <= 0) return;
+                const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(350, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.3 * sfxVolume, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.25);
+            }
+            playBoxOpen() {
+                if (!this.ctx || isSfxMuted || sfxVolume <= 0) return;
+                const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.4 * sfxVolume, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+            }
+            playFanfare() {
+                if (!this.ctx || isSfxMuted || sfxVolume <= 0) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.1);
+                    gain.gain.setValueAtTime(0.3 * sfxVolume, this.ctx.currentTime + idx * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.1 + 0.2);
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + idx * 0.1);
+                    osc.stop(this.ctx.currentTime + idx * 0.1 + 0.2);
+                });
+            }
+        }
+        const sounds = new SoundEffects();
+
+        window.showBoxInfo = function(event, type) {
+            if (event) event.stopPropagation();
+            sounds.init();
+
+            if (type === 'small') {
+                infoBoxImg.src = 'assets/kucukkutu.png';
+                infoBoxTitle.textContent = 'KÜÇÜK KUTU';
+                infoBoxCost.textContent = '50 🪙 Jeton';
+                infoBoxChance.textContent = '%5';
+                infoBoxTrophies.textContent = '+10 Kupa';
+                infoBoxFree.textContent = '🎁 Her 50 kupada 1 ücretsiz (günde en fazla 2)';
+            } else {
+                infoBoxImg.src = 'assets/buyukkutu.png';
+                infoBoxTitle.textContent = 'BÜYÜK KUTU';
+                infoBoxCost.textContent = '300 🪙 Jeton';
+                infoBoxChance.textContent = '%25';
+                infoBoxTrophies.textContent = '+50 Kupa';
+                infoBoxFree.textContent = '🎁 Her 300 kupada 1 ücretsiz (günde 1 kez)';
+            }
+
+            boxInfoModal.classList.remove('hidden');
+        };
+
+        window.closeBoxInfo = function() {
+            boxInfoModal.classList.add('hidden');
+        };
+
+        closeBoxInfoBtn.addEventListener('click', closeBoxInfo);
+
+        let pendingReward = null;
+
+        window.handleBoxOpen = function(boxType) {
+            sounds.init();
+            const free = getFreeBoxInfo(boxType);
+            const cost = FREE_BOX_RULES[boxType].cost;
+
+            if (free.canClaim) {
+                consumeFreeBox(boxType);
+            } else {
+                if (jetons < cost) {
+                    let msg = `Yetersiz Jeton! ${cost} Jeton gerekiyor.`;
+                    if (free.stock > 0 && free.left === 0) msg += '\nBugünkü ücretsiz hakkın doldu, yarın tekrar gel.';
+                    else msg += `\nÜcretsiz kutu için ${free.rule.step - free.progress} kupa daha kazan.`;
+                    alert(msg);
+                    return;
+                }
+                jetons -= cost;
+                setStoredData('fs_jetons', jetons);
+            }
+            updateUI();
+
+            const lockedChars = STARS_DATA.filter(s => !isStarUnlocked(s));
+            const lockedV2 = STARS_DATA.filter(s => isStarUnlocked(s) && !isStarV2Unlocked(s));
+
+            const pool = [
+                ...lockedChars.map(c => ({ type: 'CHAR', item: c })),
+                ...lockedV2.map(c => ({ type: 'V2', item: c }))
+            ];
+
+            const chance = boxType === 'small' ? 0.05 : 0.25;
+            const isJackpot = Math.random() < chance && pool.length > 0;
+
+            if (isJackpot) {
+                const won = pool[Math.floor(Math.random() * pool.length)];
+                if (won.type === 'CHAR') {
+                    setStoredData(`fs_unlocked_${won.item.id}`, 'true');
+                    pendingReward = {
+                        badge: 'EFSANEVİ ÇEKİLİŞ!',
+                        title: 'YENİ KARAKTER!',
+                        name: won.item.name,
+                        img: won.item.img,
+                        sub: won.item.name,
+                        isJackpot: true
+                    };
+                } else {
+                    setStoredData(`fs_v2_unlocked_${won.item.id}`, 'true');
+                    pendingReward = {
+                        badge: 'KOSTÜM AÇILDI!',
+                        title: 'YENİ KOSTÜM (V2)!',
+                        name: won.item.name + ' V2',
+                        img: won.item.img2 || won.item.img,
+                        sub: won.item.name + ' V2',
+                        isJackpot: true
+                    };
+                }
+            } else {
+                const unlockedList = STARS_DATA.filter(s => isStarUnlocked(s));
+                const targetStar = unlockedList[Math.floor(Math.random() * unlockedList.length)] || STARS_DATA[0];
+                const trophyAmount = boxType === 'small' ? 10 : 50;
+
+                let curTrophies = getStarTrophies(targetStar.id);
+                curTrophies += trophyAmount;
+                setStoredData(`fs_star_trophies_${targetStar.id}`, curTrophies);
+
+                pendingReward = {
+                    badge: boxType === 'small' ? 'KÜÇÜK KUTU' : 'BÜYÜK KUTU',
+                    title: `+${trophyAmount} KUPA`,
+                    name: targetStar.name,
+                    img: targetStar.img,
+                    sub: targetStar.name,
+                    isJackpot: false
+                };
+            }
+
+            boxModalImg.src = boxType === 'small' ? 'assets/kucukkutu.png' : 'assets/buyukkutu.png';
+            boxShakeContainer.classList.remove('hidden');
+            boxRewardContainer.classList.add('hidden');
+            boxOpeningModal.classList.remove('hidden');
+        };
+
+        boxShakeContainer.addEventListener('click', () => {
+            sounds.playBoxOpen();
+            triggerVibration(80);
+
+            boxShakeContainer.classList.add('hidden');
+            boxRewardContainer.classList.remove('hidden');
+
+            if (pendingReward) {
+                rewardBadge.textContent = pendingReward.badge;
+                rewardTitle.textContent = pendingReward.title;
+                rewardImg.src = pendingReward.img;
+                rewardSub.textContent = pendingReward.sub.toUpperCase();
+
+                if (pendingReward.isJackpot) {
+                    sounds.playFanfare();
+                    rewardBadge.className = "text-xs font-black bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 px-3 py-1 rounded-full mb-3 uppercase tracking-wider animate-pulse";
+                } else {
+                    rewardBadge.className = "text-xs font-black bg-sky-500 text-slate-950 px-3 py-1 rounded-full mb-3 uppercase tracking-wider";
+                }
+            }
+        });
+
+        closeBoxRewardBtn.addEventListener('click', () => {
+            boxOpeningModal.classList.add('hidden');
+            loadSelectedStar();
+            updateUI();
+        });
+
+        // 'START' | 'PLAYING' | 'PAUSED' | 'RESUMING' | 'GAMEOVER'
+        let gameState = 'START';
+        let score = 0;
+        const GRAVITY = 0.44;
+        const JUMP_FORCE = -8.2;
+        const MAX_FALL_SPEED = 7.5;
+        let pipeSpawnTimer = 0;
+        let lastTime = performance.now();
+        let celebrationTimeout = null;
+        let resumeCountdown = 0;
+        let audioWasPlaying = false;
+
+        function triggerCelebration() {
+            sounds.init();
+            const activeStar = STARS_DATA.find(s => s.id === selectedStarId) || STARS_DATA[0];
+            try {
+                if (currentAudio.paused) {
+                    currentAudio.currentTime = activeStar.audioStartTime;
+                    applyAudioSettings();
+                    currentAudio.play().catch(e => {});
+                }
+            } catch(e){}
+            salahCelebration.innerHTML = activeStar.celebration1;
+            salahCelebration.classList.remove('hidden');
+
+            if (celebrationTimeout) clearTimeout(celebrationTimeout);
+            celebrationTimeout = setTimeout(() => {
+                if (gameState === 'PLAYING') { salahCelebration.classList.add('hidden'); }
+            }, 3000);
+        }
+
+        const player = {
+            x: 85, y: GAME_HEIGHT / 2, visualRadius: 21, hitRadius: 14, velocity: 0, rotation: 0,
+            reset() { this.y = GAME_HEIGHT / 2; this.velocity = 0; this.rotation = 0; },
+            jump() {
+                this.velocity = JUMP_FORCE;
+                sounds.playKick();
+                triggerVibration(15);
+                createParticles(this.x, this.y);
+            },
+            update(dtScale) {
+                this.velocity += GRAVITY * dtScale;
+                if (this.velocity > MAX_FALL_SPEED) this.velocity = MAX_FALL_SPEED;
+                this.y += this.velocity * dtScale;
+                if (this.velocity < 0) { this.rotation = Math.max(-0.4, this.rotation - 0.08 * dtScale); }
+                else { this.rotation = Math.min(0.65, this.rotation + 0.05 * dtScale); }
+            },
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                const r = this.visualRadius;
+
+                ctx.beginPath(); ctx.arc(0, 0, r + 2, 0, Math.PI * 2); ctx.fillStyle = '#FFD700'; ctx.fill();
+                ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fillStyle = '#0284c7'; ctx.fill(); ctx.clip();
+
+                if (isStarImgLoaded) {
+                    const star = STARS_DATA.find(s => s.id === selectedStarId) || STARS_DATA[0];
+                    const formNum = getStarForm(star.id);
+                    const cropYRatio = (formNum === 2 && star.cropY2 !== undefined) ? star.cropY2 : (star.cropY1 !== undefined ? star.cropY1 : 0.15);
+
+                    const cropSize = Math.min(starImage.width, starImage.height);
+                    const sx = (starImage.width - cropSize) / 2;
+                    const sy = Math.max(0, (starImage.height - cropSize) * cropYRatio);
+                    ctx.drawImage(starImage, sx, sy, cropSize, cropSize, -r * 1.15, -r * 1.15, r * 2.3, r * 2.3);
+                }
+                ctx.restore();
+
+                ctx.save();
+                ctx.translate(this.x, this.y - r + 1);
+                ctx.rotate(this.rotation * 0.3);
+                ctx.fillStyle = '#FFD700'; ctx.strokeStyle = '#854d0e'; ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(-7, -5); ctx.lineTo(-4, -1); ctx.lineTo(0, -8);
+                ctx.lineTo(4, -1); ctx.lineTo(7, -5); ctx.lineTo(5, 1); ctx.lineTo(-5, 1);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.restore();
+            }
+        };
+
+        function drawStadiumBackground() {
+            ctx.fillStyle = cachedSkyGrad || '#020617';
+            ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+            ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(0, 280); ctx.lineTo(120, 280); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(370, 0); ctx.lineTo(280, 280); ctx.lineTo(400, 280); ctx.closePath(); ctx.fill();
+        }
+
+        let pitchOffset = 0;
+        const GROUND_HEIGHT = 60;
+        function drawPitch() {
+            const groundY = GAME_HEIGHT - GROUND_HEIGHT;
+            ctx.fillStyle = '#15803d'; ctx.fillRect(0, groundY, GAME_WIDTH, GROUND_HEIGHT);
+            if (gameState === 'PLAYING') pitchOffset = (pitchOffset + PIPE_SPEED) % 28;
+            ctx.fillStyle = '#166534';
+            for (let x = -pitchOffset; x < GAME_WIDTH + 28; x += 28) { ctx.fillRect(x, groundY, 14, GROUND_HEIGHT); }
+            ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, groundY, GAME_WIDTH, 4);
+        }
+
+        let pipes = [];
+        function createPipe() {
+            const minTop = 45;
+            const maxTop = GAME_HEIGHT - GROUND_HEIGHT - PIPE_GAP - 45;
+            const topHeight = Math.floor(Math.random() * (maxTop - minTop + 1)) + minTop;
+            pipes.push({ x: GAME_WIDTH, topHeight: topHeight, bottomY: topHeight + PIPE_GAP, width: 54, passed: false });
+        }
+
+        function updatePipes(dt, dtScale) {
+            pipeSpawnTimer += dt;
+            if (pipeSpawnTimer >= PIPE_SPAWN_INTERVAL) {
+                createPipe();
+                pipeSpawnTimer = 0;
+            }
+
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                const pipe = pipes[i];
+                pipe.x -= PIPE_SPEED * dtScale;
+                if (!pipe.passed && player.x > pipe.x + pipe.width) {
+                    pipe.passed = true;
+                    score++;
+                    sounds.playGoal();
+                    if (score >= 1) triggerCelebration();
+                }
+                if (pipe.x + pipe.width < -10) pipes.splice(i, 1);
+            }
+        }
+
+        function drawPipes() {
+            const activeStar = STARS_DATA.find(s => s.id === selectedStarId) || STARS_DATA[0];
+            const pColors = activeStar.pipeColors || { grad1: '#0284c7', grad2: '#38bdf8', grad3: '#0369a1', border: '#0c4a6e', cap: '#eab308' };
+
+            const currentKey = pColors.grad1 + pColors.grad2 + pColors.grad3;
+            if (!cachedPipeGrad || cachedPipeColorsKey !== currentKey) {
+                cachedPipeColorsKey = currentKey;
+                cachedPipeGrad = ctx.createLinearGradient(0, 0, 54, 0);
+                cachedPipeGrad.addColorStop(0, pColors.grad1);
+                cachedPipeGrad.addColorStop(0.5, pColors.grad2);
+                cachedPipeGrad.addColorStop(1, pColors.grad3);
+            }
+
+            ctx.strokeStyle = pColors.border; ctx.lineWidth = 2;
+
+            pipes.forEach(pipe => {
+                ctx.save();
+                ctx.translate(pipe.x, 0);
+
+                // Üst boru
+                ctx.fillStyle = cachedPipeGrad;
+                ctx.fillRect(0, 0, pipe.width, pipe.topHeight);
+                ctx.strokeRect(0, 0, pipe.width, pipe.topHeight);
+                ctx.fillStyle = pColors.cap;
+                ctx.fillRect(-3, pipe.topHeight - 18, pipe.width + 6, 18);
+                ctx.strokeRect(-3, pipe.topHeight - 18, pipe.width + 6, 18);
+
+                // Alt boru
+                const bottomHeight = GAME_HEIGHT - GROUND_HEIGHT - pipe.bottomY;
+                ctx.fillStyle = cachedPipeGrad;
+                ctx.fillRect(0, pipe.bottomY, pipe.width, bottomHeight);
+                ctx.strokeRect(0, pipe.bottomY, pipe.width, bottomHeight);
+                ctx.fillStyle = pColors.cap;
+                ctx.fillRect(-3, pipe.bottomY, pipe.width + 6, 18);
+                ctx.strokeRect(-3, pipe.bottomY, pipe.width + 6, 18);
+
+                ctx.restore();
+            });
+        }
+
+        let particles = [];
+        function createParticles(x, y) {
+            if (particles.length > 15) return;
+            for (let i = 0; i < 2; i++) {
+                particles.push({ x: x - 10, y: y + 6, vx: (Math.random() - 0.5) * 2.5, vy: Math.random() * 2 + 0.8, size: Math.random() * 3 + 2, alpha: 1 });
+            }
+        }
+
+        function updateAndDrawParticles() {
+            if (particles.length === 0) return;
+            ctx.fillStyle = '#FFFFFF';
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                if (gameState === 'PLAYING') { p.x += p.vx; p.y += p.vy; p.alpha -= 0.06; }
+                if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function checkCollisions() {
+            const hr = player.hitRadius;
+            if (player.y - hr <= 0 || player.y + hr >= GAME_HEIGHT - GROUND_HEIGHT) return true;
+            for (let i = 0; i < pipes.length; i++) {
+                const pipe = pipes[i];
+                if (player.x + hr > pipe.x && player.x - hr < pipe.x + pipe.width) {
+                    if (player.y - hr < pipe.topHeight || player.y + hr > pipe.bottomY) return true;
+                }
+            }
+            return false;
+        }
+
+        function drawScoreHUD() {
+            if (gameState === 'PLAYING' || gameState === 'PAUSED' || gameState === 'RESUMING') {
+                // Sağ üstte durdurma butonu olduğu için skor biraz sola alındı
+                ctx.save(); ctx.font = '700 40px "Teko", sans-serif'; ctx.textAlign = 'right'; ctx.fillStyle = '#FFD700'; ctx.strokeStyle = '#000000'; ctx.lineWidth = 4;
+                ctx.strokeText(`GOL: ${score}`, GAME_WIDTH - 60, 48); ctx.fillText(`GOL: ${score}`, GAME_WIDTH - 60, 48); ctx.restore();
+            }
+            if (gameState === 'RESUMING') {
+                ctx.save();
+                ctx.font = '700 120px "Teko", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = '#000000'; ctx.lineWidth = 8;
+                const n = String(Math.max(1, Math.ceil(resumeCountdown)));
+                ctx.strokeText(n, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40);
+                ctx.fillText(n, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40);
+                ctx.restore();
+            }
+        }
+
+        function gameLoop(now) {
+            const dt = Math.min((now - lastTime) / 1000, 0.033);
+            lastTime = now;
+            const dtScale = dt * 60;
+
+            drawStadiumBackground();
+
+            if (gameState === 'PLAYING') {
+                player.update(dtScale);
+                updatePipes(dt, dtScale);
+                if (checkCollisions()) triggerGameOver();
+            } else if (gameState === 'RESUMING') {
+                resumeCountdown -= dt;
+                if (resumeCountdown <= 0) {
+                    gameState = 'PLAYING';
+                    if (audioWasPlaying) { try { currentAudio.play().catch(e => {}); } catch(e){} }
+                }
+            } else if (gameState === 'START') {
+                player.y = GAME_HEIGHT / 2 + Math.sin(now / 260) * 7;
+            }
+
+            drawPipes(); drawPitch(); player.draw(); updateAndDrawParticles(); drawScoreHUD();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            sounds.init();
+            applyDifficultySettings();
+
+            const star = STARS_DATA.find(s => s.id === selectedStarId) || STARS_DATA[0];
+            const baseUnlocked = isStarUnlocked(star);
+            const v2Unlocked = isStarV2Unlocked(star);
+            const formNum = getStarForm(star.id);
+
+            const isCurrentLocked = (!baseUnlocked) || (formNum === 2 && !v2Unlocked);
+
+            if (isCurrentLocked) {
+                if (!baseUnlocked) {
+                    salahCelebration.innerHTML = "BU KARAKTER KİLİTLİ!<br><span class='text-yellow-300 text-sm font-bold'>" + calculateTotalTrophies() + " / " + star.requiredTrophies + " 🏆 — kupa kas veya kutudan çıkar!</span>";
+                } else {
+                    salahCelebration.innerHTML = "V2 SKİNİ KİLİTLİ!<br><span class='text-yellow-300 text-sm font-bold'>400 🪙 ile aç veya bu karakterle 200 kupa kas!</span>";
+                }
+                salahCelebration.classList.remove('hidden');
+                setTimeout(() => { salahCelebration.classList.add('hidden'); }, 2500);
+                return;
+            }
+
+            try {
+                currentAudio.pause();
+                currentAudio.currentTime = star.audioStartTime;
+                applyAudioSettings();
+            } catch(e){}
+
+            gameState = 'PLAYING'; score = 0; pipeSpawnTimer = 0; pipes = []; particles = [];
+            player.reset(); player.jump();
+            createPipe();
+
+            uiOverlay.classList.add('hidden'); topLobbyHeader.classList.add('hidden'); leftLobbyMenu.classList.add('hidden');
+            startCard.classList.add('hidden'); starsCard.classList.add('hidden'); settingsCard.classList.add('hidden'); gameOverCard.classList.add('hidden'); salahCelebration.classList.add('hidden');
+            pauseOverlay.classList.add('hidden');
+            pauseBtn.classList.remove('hidden');
+        }
+
+        // Koşunun kupa/jeton ödüllerini kaydeder (oyun bitişi, yeniden başla ve oyundan çık için ortak)
+        function awardRun() {
+            let starTrophies = getStarTrophies(selectedStarId);
+            starTrophies += score;
+            setStoredData(`fs_star_trophies_${selectedStarId}`, starTrophies);
+
+            const earnedJ = score * 2;
+            jetons += earnedJ;
+            setStoredData('fs_jetons', jetons);
+
+            if (score > highScore) { highScore = score; setStoredData('fs_high_score', highScore); }
+
+            totalTrophies = calculateTotalTrophies();
+            totalTrophiesText.textContent = totalTrophies;
+            highScoreText.textContent = highScore;
+            headerTokensText.textContent = jetons;
+            characterTrophies.textContent = starTrophies;
+            earnedTrophies.textContent = `+${score}`;
+            earnedTokens.textContent = `+${earnedJ} 🪙`;
+
+            score = 0;
+        }
+
+        function triggerGameOver() {
+            sounds.playWhistle();
+            triggerVibration(200);
+
+            try { currentAudio.pause(); } catch(e){}
+
+            gameState = 'GAMEOVER';
+            salahCelebration.classList.add('hidden');
+            pauseBtn.classList.add('hidden');
+
+            awardRun();
+
+            uiOverlay.classList.remove('hidden');
+            gameOverCard.classList.remove('hidden');
+        }
+
+        function goHome() {
+            pauseOverlay.classList.add('hidden');
+            pauseBtn.classList.add('hidden');
+            salahCelebration.classList.add('hidden');
+            uiOverlay.classList.remove('hidden');
+            gameOverCard.classList.add('hidden');
+            starsCard.classList.add('hidden');
+            settingsCard.classList.add('hidden');
+            startCard.classList.remove('hidden');
+            topLobbyHeader.classList.remove('hidden');
+            leftLobbyMenu.classList.remove('hidden');
+            gameState = 'START';
+            loadSelectedStar();
+            updateUI();
+        }
+
+        // ===== DURDURMA =====
+        function pauseGame() {
+            if (gameState !== 'PLAYING') return;
+            gameState = 'PAUSED';
+            audioWasPlaying = !currentAudio.paused;
+            try { currentAudio.pause(); } catch(e){}
+            salahCelebration.classList.add('hidden');
+            pauseScore.textContent = score;
+            applyAudioSettings();
+            pauseOverlay.classList.remove('hidden');
+            triggerVibration(20);
+        }
+
+        function resumeGame() {
+            if (gameState !== 'PAUSED') return;
+            pauseOverlay.classList.add('hidden');
+            resumeCountdown = 3;       // 3 saniyelik geri sayımla devam
+            gameState = 'RESUMING';
+        }
+
+        pauseBtn.addEventListener('click', (e) => { e.stopPropagation(); pauseGame(); });
+        resumeBtn.addEventListener('click', (e) => { e.stopPropagation(); resumeGame(); });
+        pauseRestartBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            awardRun();
+            pauseOverlay.classList.add('hidden');
+            startGame();
+        });
+        quitBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            try { currentAudio.pause(); } catch(e2){}
+            awardRun();
+            goHome();
+        });
+
+        // Uygulama arka plana giderse oyun otomatik durur
+        document.addEventListener('visibilitychange', () => { if (document.hidden) pauseGame(); });
+
+        let lastInputTime = 0;
+        let isTouchActive = false;
+
+        function handleInput(e) {
+            if (e) {
+                if (e.type === 'keydown') {
+                    if (e.code !== 'Space' || e.repeat) return;
+                }
+                if (e.type === 'touchstart') {
+                    isTouchActive = true;
+                    if (e.cancelable) e.preventDefault();
+                } else if (e.type === 'mousedown') {
+                    if (isTouchActive) {
+                        isTouchActive = false;
+                        return;
+                    }
+                }
+            }
+
+            const now = performance.now();
+            if (now - lastInputTime < 130) return;
+            lastInputTime = now;
+
+            sounds.init();
+            if (gameState === 'PLAYING') player.jump();
+        }
+
+        startBtn.addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
+        restartBtn.addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
+        homeBtn.addEventListener('click', (e) => { e.stopPropagation(); goHome(); });
+
+        canvas.addEventListener('mousedown', handleInput);
+        canvas.addEventListener('touchstart', handleInput, { passive: false });
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Escape' || e.code === 'KeyP') {
+                if (gameState === 'PLAYING') pauseGame();
+                else if (gameState === 'PAUSED') resumeGame();
+                return;
+            }
+            handleInput(e);
+        });
+
+        applyDifficultySettings();
+        loadSelectedStar();
+        updateUI();
+
+        requestAnimationFrame((now) => { lastTime = now; gameLoop(now); });
+    </script>
+    </body>
+    </html>
