@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -14,6 +14,7 @@
         #gameWrap.card-open #leftLobbyMenu button { pointer-events: none; }
         .pos-70 { object-position: 50% 70%; }
         .pos-12 { object-position: 50% 12%; }
+        .pos-18 { object-position: 50% 18%; }
         .one-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
         html, body { height: 100%; }
         body {
@@ -40,6 +41,14 @@
             40% { transform: rotate(8deg) scale(1.08); } 60% { transform: rotate(-6deg) scale(1.05); } 80% { transform: rotate(6deg) scale(1.02); }
         }
         .animate-shake { animation: boxShake 0.4s ease-in-out infinite; }
+        /* Menü butonları: ikon gri tabanın ÜSTÜNDE oturur, yazı gri tabanın ALTINDA durur */
+        .menu-tile { position: relative; width: 80px; height: 84px; padding: 0; border: 0; background: none; cursor: pointer; transition: transform .12s; }
+        .menu-tile:active { transform: translateY(2px) scale(.97); }
+        .tile-base { position: absolute; left: 4px; right: 4px; top: 32px; height: 24px; transform: skewX(-14deg);
+            background: linear-gradient(180deg, #9ca3af, #4b5563); border: 2px solid #e5e7eb; border-radius: 5px; box-shadow: 0 3px 0 rgba(0,0,0,.5); }
+        .tile-img { position: absolute; left: 50%; top: -6px; width: 64px; height: 56px; object-fit: contain; transform: translateX(-50%); filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); pointer-events: none; }
+        .tile-label { position: absolute; left: -8px; right: -8px; top: 62px; text-align: center; white-space: nowrap;
+            font-family: 'Teko', sans-serif; font-size: 13px; line-height: 15px; color: #fff; letter-spacing: .3px; text-shadow: 0 1px 3px #000, 0 0 6px rgba(0,0,0,.8); }
     </style>
 </head>
 <body>
@@ -69,14 +78,31 @@
                 <button id="openSettingsBtn" title="Ayarlar" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg flex items-center justify-center text-xs font-bold text-slate-200 shadow active:scale-95 transition flex-shrink-0">⚙</button>
             </div>
         </div>
-
         <div id="leftLobbyMenu" class="absolute top-16 left-3 right-3 flex justify-between items-start z-20 pointer-events-none">
-            <button id="openStarsBtn" class="pointer-events-auto bg-gradient-to-r from-sky-600 to-blue-700 border-2 border-sky-400 text-white font-salah px-3 py-1.5 rounded-xl shadow-lg active:scale-95 transition">
-                <span class="text-base tracking-wider">STARS</span>
-            </button>
-            <button id="openLbBtn" class="pointer-events-auto bg-gradient-to-r from-amber-500 to-yellow-600 border-2 border-yellow-300 text-slate-950 font-salah px-3 py-1.5 rounded-xl shadow-lg active:scale-95 transition">
-                <span class="text-base tracking-wider">LİDERLİK</span>
-            </button>
+            <div class="flex flex-col gap-1">
+                <button id="openStarsBtn" class="menu-tile pointer-events-auto">
+                    <span class="tile-base"></span>
+                    <img class="tile-img" src="assets/menu_karakterler.png">
+                    <span class="tile-label">KARAKTERLER</span>
+                </button>
+                <button id="openArenasBtn" class="menu-tile pointer-events-auto">
+                    <span class="tile-base"></span>
+                    <img class="tile-img" src="assets/menu_arenalar.png">
+                    <span class="tile-label">ARENALAR</span>
+                </button>
+            </div>
+            <div class="flex flex-col gap-1">
+                <button id="openLbBtn" class="menu-tile pointer-events-auto">
+                    <span class="tile-base"></span>
+                    <img class="tile-img" src="assets/menu_liderlik.png">
+                    <span class="tile-label">LİDERLİK</span>
+                </button>
+                <button id="openShopBtn" class="menu-tile pointer-events-auto">
+                    <span class="tile-base"></span>
+                    <img class="tile-img" src="assets/menu_magaza.png">
+                    <span class="tile-label">MAĞAZA</span>
+                </button>
+            </div>
         </div>
 
         <button id="pauseBtn" title="Durdur" class="hidden absolute top-3 right-3 z-20 w-9 h-9 bg-slate-950/80 border-2 border-amber-500/80 rounded-xl flex items-center justify-center text-amber-300 font-black text-sm shadow-lg active:scale-90 transition">❚❚</button>
@@ -165,9 +191,10 @@
             <!-- Ana Lobi -->
             <div id="startCard" class="w-full h-full flex flex-col justify-between p-3 z-20">
                 <div class="flex-1 flex flex-col items-center justify-center mt-6">
-                    <div class="bg-amber-950/90 border-2 border-amber-400 px-3 py-0.5 rounded-xl text-xs font-bold text-amber-300 mb-2 shadow-lg flex items-center gap-1.5">
-                        <span class="text-slate-200 text-[10px] font-extrabold uppercase">Karakter Kupası:</span>
-                        <span id="characterTrophies" class="font-salah text-xl text-yellow-300">0</span>
+                    <div class="mb-2 flex items-center gap-2 px-3 py-1 rounded-full border-2 border-yellow-200/90 bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600 shadow-[0_0_16px_rgba(251,191,36,0.55)]">
+                        <span class="text-sm drop-shadow">🏆</span>
+                        <span class="hidden text-[10px] font-extrabold uppercase tracking-wide text-amber-950">Karakter Kupası</span>
+                        <span id="characterTrophies" class="font-salah text-xl leading-none text-white px-2 py-0.5 rounded-full bg-slate-950/75 border border-yellow-300/60" style="text-shadow:0 0 8px rgba(253,224,71,.85)">0</span>
                     </div>
                     <div class="relative flex items-center justify-center w-full max-w-[220px]">
                         <button id="prevFormBtn" class="absolute -left-2 z-30 w-8 h-8 bg-slate-900/90 border-2 border-amber-400 rounded-full text-amber-300 font-black text-xs flex items-center justify-center shadow-lg active:scale-90 transition">◀</button>
@@ -233,13 +260,26 @@
                     <div class="grid grid-cols-3 gap-1 mb-2">
                         <button id="lbTabTro" class="text-[10px] font-bold py-1.5 border rounded">TOPLAM KUPA</button>
                         <button id="lbTabScore" class="text-[10px] font-bold py-1.5 border rounded">EN YÜKSEK GOL</button>
-                        <button id="lbTabChars" class="text-[10px] font-bold py-1.5 border rounded">STARS</button>
+                        <button id="lbTabChars" class="text-[9px] font-bold py-1.5 border rounded">KARAKTERLER</button>
                     </div>
                     <div id="lbList" class="overflow-y-auto custom-scroll pr-1 space-y-1.5 min-h-[200px] max-h-[340px]"></div>
                     <div id="lbMe" class="mt-2 pt-2 border-t border-slate-800 text-xs font-bold text-emerald-300 text-center"></div>
                 </div>
             </div>
-
+            <!-- Mağaza -->
+            <div id="shopModal" class="hidden absolute inset-0 bg-slate-950/90 z-50 flex flex-col items-center justify-center p-4">
+                <div class="card-bg rounded-2xl shadow-2xl max-w-xs w-full border-amber-400 p-4 flex flex-col max-h-[94%]">
+                    <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
+                        <h2 class="text-2xl font-salah text-amber-400 m-0">MAĞAZA</h2>
+                        <button id="shopCloseBtn" class="text-slate-400 hover:text-white font-bold text-lg px-2">✕</button>
+                    </div>
+                    <div class="overflow-y-auto custom-scroll pr-1">
+                        <button id="noAdsBtn" class="w-full"></button>
+                        <div class="font-salah text-xl text-sky-300 mt-3 mb-1 text-left">JETON PAKETLERİ</div>
+                        <div id="shopGrid" class="grid grid-cols-2 gap-2"></div>
+                    </div>
+                </div>
+            </div>
             <!-- Kod Onay -->
             <div id="codeConfirmModal" class="hidden absolute inset-0 bg-slate-950/90 z-50 flex flex-col items-center justify-center p-4">
                 <div class="card-bg p-5 rounded-2xl shadow-2xl max-w-xs w-full text-center border-amber-400">
@@ -267,17 +307,32 @@
 
             <!-- Stars -->
             <div id="starsCard" class="hidden card-bg text-center p-4 rounded-2xl shadow-2xl max-w-xs w-full flex flex-col max-h-[85%] z-30">
-                <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
-                    <h2 class="text-2xl font-salah text-amber-400 m-0">STARS</h2>
-                    <div class="flex items-center gap-2">
-                        <button id="sortStarsBtn" class="text-xs bg-slate-900 border border-amber-500/50 px-2.5 py-1 rounded-lg text-amber-300 font-bold">Sırala: <span id="sortDirectionText">En Yüksek</span></button>
-                        <span id="starsCount" class="text-xs font-black text-emerald-300 bg-slate-900 border border-emerald-500/40 px-2 py-1 rounded-lg">0/0</span>
-                        <button id="closeStarsBtn" class="text-slate-400 hover:text-white font-bold text-lg px-2">✕</button>
+                <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800 gap-1.5">
+                    <h2 class="text-base font-salah text-amber-400 m-0 whitespace-nowrap">KARAKTERLER</h2>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                        <button id="sortStarsBtn" class="text-[10px] bg-slate-900 border border-amber-500/50 px-2 py-1 rounded-lg text-amber-300 font-bold whitespace-nowrap">Sırala: <span id="sortDirectionText">En Yüksek</span></button>
+                        <span id="starsCount" class="text-[10px] font-black text-emerald-300 bg-slate-900 border border-emerald-500/40 px-1.5 py-1 rounded-lg whitespace-nowrap">0/0</span>
+                        <button id="closeStarsBtn" class="text-slate-400 hover:text-white font-bold text-lg px-1">✕</button>
                     </div>
                 </div>
                 <div id="starsList" class="space-y-2.5 overflow-y-auto custom-scroll pr-1 my-1"></div>
                 <div class="pt-2 border-t border-slate-800 mt-2">
                     <button id="continueStarsBtn" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-salah text-2xl rounded-xl shadow-lg active:scale-95 transition">DEVAM ET</button>
+                </div>
+            </div>
+
+            <!-- Arenalar -->
+            <div id="arenasCard" class="hidden card-bg text-center p-4 rounded-2xl shadow-2xl max-w-xs w-full flex flex-col max-h-[85%] z-30" style="border-color:#34d399">
+                <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
+                    <h2 class="text-2xl font-salah text-emerald-400 m-0">ARENALAR</h2>
+                    <div class="flex items-center gap-2">
+                        <span id="arenasCount" class="text-xs font-black text-emerald-300 bg-slate-900 border border-emerald-500/40 px-2 py-1 rounded-lg">0/0</span>
+                        <button id="closeArenasBtn" class="text-slate-400 hover:text-white font-bold text-lg px-2">✕</button>
+                    </div>
+                </div>
+                <div id="arenasList" class="space-y-2.5 overflow-y-auto custom-scroll pr-1 my-1"></div>
+                <div class="pt-2 border-t border-slate-800 mt-2">
+                    <button id="continueArenasBtn" class="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-salah text-2xl rounded-xl shadow-lg active:scale-95 transition">DEVAM ET</button>
                 </div>
             </div>
 
@@ -357,7 +412,7 @@
         { id: 'kartal', name: 'İsmail Kartal', nameUp: 'İSMAİL KARTAL', title: 'Özel Karakter ⭐', img: 'kartal.jpg', img2: 'kartal2.jpg', zoom1: 1.25, zoom2: 0.88, audio: 'kartal.mp3', audio2: 'kartal2.mp3', audioStartTime: 0.0, pipeColors: PAL.fb, celebration1: cel('GERGİN UYKULARDAN', 'İSMAİL KARTAL!'), celebration2: cel('BİNİM BİNİM BİNİM', 'İSMAİL KARTAL!') }
     ];
 
-    // Karakter açma şartları (TOPLAM kupa). İlk 4 direkt açık, gerisi 5000'e kadar kademeli zorlaşır.
+    // Karakter açma şartları (TOPLAM kupa). İlk 4 direkt açık, gerisi kademeli zorlaşır.
     const REQ = { salah: 0, icardi: 0, quaresma: 0, dzeko: 0,   // ilk 4 direkt açık
         // futbolcular
         muci: 400, tadic: 700, olaitan: 1000, noalang: 1400, guler: 1800, turan: 2200, tufan: 2600, rodellega: 3000, lualua: 3300,
@@ -443,7 +498,7 @@
     function formZoom(star, f) { const z = star['zoom' + f]; return z === undefined ? 1 : z; }
     function maxForm(star) { return star.img3 ? 3 : (star.img2 ? 2 : 1); }
     function formImg(star, f) { return (f === 3 && star.img3) ? star.img3 : (f === 2 && star.img2) ? star.img2 : star.img; }
-    function formPos(star, f) { return star['imgPos' + f] || star.imgPos1 || 'object-top'; }
+    function formPos(star, f) { return star['imgPos' + f] || star.imgPos1 || 'pos-18'; }
     function formCrop(star, f) { const v = star['cropY' + f]; return v !== undefined ? v : (star.cropY1 !== undefined ? star.cropY1 : 0.15); }
     function formAudio(star, f) { return (f === 3 && star.audio3) ? star.audio3 : (f === 2 && star.audio2) ? star.audio2 : star.audio; }
     function formName(star, f) { return f === 3 ? (star.name3 || star.name + ' V3') : f === 2 ? (star.name2 || star.name + ' V2') : star.name; }
@@ -674,7 +729,6 @@
     };
     function todayKey() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
     // Ücretsiz kutu: hak otomatik gelmez. Her gün sıfırdan başlar; BUGÜN oynayarak kazandığın kupa barı doldurur.
-    // Küçük kutu: bugün her 100 kupada 1 (günde en fazla 2). Büyük kutu: bugün her 500 kupada 1 (günde en fazla 1).
     function dayNum() { const d = new Date(); return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000); }
     function dailyState() {
         const today = dayNum();
@@ -858,7 +912,7 @@
             if (unlocked && maxF > 1) {
                 const ok = [], lock = [];
                 for (let f = 2; f <= maxF; f++) (isFormUnlocked(star, f) ? ok : lock).push(f);
-                if (ok.length) formHtml += `<div class="flex items-center gap-1 mt-0.5">${[1, ...ok].map(f =>
+                if (ok.length) formHtml += `<div class="flex items-center gap-1">${[1, ...ok].map(f =>
                     `<button data-form-btn="true" onclick="changeStarForm(event, '${star.id}', ${f})" class="text-[10px] font-bold px-2 py-0.5 rounded border ${shownForm === f ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-800 text-slate-400 border-slate-700'}">V${f}</button>`).join('')}</div>`;
                 lock.forEach(f => {
                     formHtml += `<button data-form-btn="true" onclick="selectStar('${star.id}'); setStarForm('${star.id}', ${f}); loadSelectedStar();" class="text-[10px] font-bold px-2 py-0.5 rounded border bg-slate-800 text-amber-300 border-amber-500/50 active:scale-95 transition whitespace-nowrap">🔒 V${f} (${star.trophies}/${FORM_REQ[f]} 🏆)</button>`;
@@ -868,6 +922,7 @@
             const pickBtn = isSelected ? `<span class="text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 px-3 py-1 rounded-lg">SEÇİLDİ</span>`
                 : unlocked ? `<button onclick="selectStar('${star.id}')" class="text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white px-3 py-1 rounded-lg">SEÇ</button>`
                 : `<button onclick="selectStar('${star.id}')" class="text-xs font-bold bg-amber-500 text-slate-950 px-3 py-1 rounded-lg border border-amber-300">🔒 İNCELE</button>`;
+
             card.innerHTML = `
                 <div class="flex items-center gap-3">
                     <div class="w-12 h-12 rounded-full overflow-hidden border border-white/20 bg-slate-800 flex-shrink-0 relative">
@@ -876,11 +931,11 @@
                     <div class="text-left min-w-0 flex-1">
                         <div class="flex items-center gap-1 min-w-0"><span class="font-salah ${listName.length > 14 ? 'text-base' : 'text-lg'} leading-tight text-white truncate">${listName}</span>${badge}</div>
                         <div class="text-[10px] text-sky-400 font-bold truncate">${star.title}</div>
+                        ${formHtml ? `<div class="flex flex-wrap items-center gap-1 my-0.5">${formHtml}</div>` : ''}
                         <div class="text-[11px] text-amber-300 font-bold">Kupa: ${trophyText} 🏆</div>
                     </div>
                     <div class="flex-shrink-0">${pickBtn}</div>
-                </div>
-                ${formHtml ? `<div class="flex flex-wrap justify-end items-center gap-1 mt-2">${formHtml}</div>` : ''}`;
+                </div>`;
             starsList.appendChild(card);
         });
     }
@@ -1264,7 +1319,7 @@
             const c = scoreSprite.getContext('2d');
             c.scale(k, k);
             c.font = '700 40px "Teko", sans-serif'; c.textAlign = 'right'; c.fillStyle = '#FFD700'; c.strokeStyle = '#000000'; c.lineWidth = 4;
-            c.strokeText(`GOL: ${score}`, W - 4, 44); c.fillText(`GOL: ${score}`, W - 4, 44);
+            c.strokeText(`${tx('GOL:')} ${score}`, W - 4, 44); c.fillText(`${tx('GOL:')} ${score}`, W - 4, 44);
         }
         ctx.drawImage(scoreSprite, GAME_WIDTH - 60 - (W - 4), 4, W, H);
     }
@@ -1342,6 +1397,7 @@
 
         uiOverlay.classList.add('hidden'); topLobbyHeader.classList.add('hidden'); leftLobbyMenu.classList.add('hidden');
         startCard.classList.add('hidden'); starsCard.classList.add('hidden'); settingsCard.classList.add('hidden'); gameOverCard.classList.add('hidden'); salahCelebration.classList.add('hidden');
+        $('arenasCard').classList.add('hidden');
         pauseOverlay.classList.add('hidden');
         pauseBtn.classList.remove('hidden');
     }
@@ -1379,6 +1435,7 @@
         pauseOverlay.classList.add('hidden'); pauseBtn.classList.add('hidden'); salahCelebration.classList.add('hidden');
         uiOverlay.classList.remove('hidden');
         gameOverCard.classList.add('hidden'); starsCard.classList.add('hidden'); settingsCard.classList.add('hidden');
+        $('arenasCard').classList.add('hidden');
         startCard.classList.remove('hidden'); topLobbyHeader.classList.remove('hidden'); leftLobbyMenu.classList.remove('hidden');
         gameState = 'START'; player.reset(); dirty = true;
         loadSelectedStar(); updateUI();
@@ -1578,16 +1635,21 @@
     }
 
     async function fbTop(field) {
-        const body = { structuredQuery: { from: [{ collectionId: 'players' }], orderBy: [{ field: { fieldPath: field }, direction: 'DESCENDING' }], limit: 30 } };
-        const r = await fx(`${FS_BASE}:runQuery?key=${FB.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        if (!r.ok) throw new Error('liste ' + await errText(r));
-        const j = await r.json();
-        return j.filter(x => x.document).map(x => {
-            const f = x.document.fields || {};
-            return { id: x.document.name.split('/').pop(), name: (f.name && f.name.stringValue) || 'Oyuncu', avatar: (f.avatar && f.avatar.stringValue) || '',
-                best: parseInt((f.bestScore && f.bestScore.integerValue) || '0', 10), tro: parseInt((f.totalTrophies && f.totalTrophies.integerValue) || '0', 10) };
-        }).filter(x => (field === 'bestScore' ? x.best : x.tro) > 0);
-    }
+    const isTro = field === 'totalTrophies';
+    const body = { structuredQuery: {
+        from: [{ collectionId: 'players' }],
+        select: { fields: ['name', 'avatar', 'bestScore', 'totalTrophies'].map(f => ({ fieldPath: f })) },
+        orderBy: [{ field: { fieldPath: field }, direction: 'DESCENDING' }],
+        limit: isTro ? 200 : 30 } };
+    const r = await fx(`${FS_BASE}:runQuery?key=${FB.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }, 15000);
+    if (!r.ok) throw new Error('liste ' + await errText(r));
+    const j = await r.json();
+    return j.filter(x => x.document).map(x => {
+        const f = x.document.fields || {};
+        return { id: x.document.name.split('/').pop(), name: (f.name && f.name.stringValue) || 'Oyuncu', avatar: (f.avatar && f.avatar.stringValue) || '',
+            best: parseInt((f.bestScore && f.bestScore.integerValue) || '0', 10), tro: parseInt((f.totalTrophies && f.totalTrophies.integerValue) || '0', 10) };
+    }).filter(x => field === 'bestScore' ? x.best > 0 : true);   // kupada 0 olanlar da görünsün
+}
     async function fbRank(field, value) {
         const body = { structuredAggregationQuery: { aggregations: [{ alias: 'c', count: {} }], structuredQuery: { from: [{ collectionId: 'players' }], where: { fieldFilter: { field: { fieldPath: field }, op: 'GREATER_THAN', value: { integerValue: String(value) } } } } } };
         const r = await fx(`${FS_BASE}:runAggregationQuery?key=${FB.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -1649,7 +1711,7 @@
         }).join('') : '<div class="text-center text-slate-400 text-xs py-10">Henüz kimse yok. İlk sen ol!</div>';
         if (!username) lbMe.textContent = 'Sıran için önce profil oluştur.';
         else if (getStoredData('fs_name_conflict', '') === username) lbMe.textContent = 'Bu ismi başkası almış. Profilden yeni isim seç.';
-        else if (d.mine <= 0) lbMe.textContent = 'Oyna ve skorunla listeye gir!';
+        else if (isScore && d.mine <= 0) lbMe.textContent = 'Oyna ve skorunla listeye gir!';
         else if (d.rank) lbMe.textContent = `Senin sıran: #${d.rank} · ${d.mine} ${unit}`;
         else lbMe.textContent = `Senin skorun: ${d.mine} ${unit}`;
     }
@@ -1675,7 +1737,7 @@
             const mine = tab === 'bestScore' ? highScore : calculateTotalTrophies();
             const idx = rows.findIndex(r => r.id === uid);
             let rank = idx >= 0 ? idx + 1 : null;
-            if (rank === null && mine > 0 && lbLastSent) rank = await fbRank(tab, mine).catch(() => null);
+           if (rank === null && (tab === 'totalTrophies' || mine > 0) && lbLastSent) rank = await fbRank(tab, mine).catch(() => null);
             if (my !== lbToken) return;
             const d = { t: Date.now(), tab, rows, rank, mine };
             lbCache[tab] = d; renderLb(d);
@@ -1690,8 +1752,8 @@
     $('lbTabScore').addEventListener('click', () => { lbTab = 'bestScore'; loadLb(false); });
     $('lbTabTro').addEventListener('click', () => { lbTab = 'totalTrophies'; loadLb(false); });
     $('lbTabChars').addEventListener('click', () => { lbTab = 'chars'; loadLb(false); });
-    // Açık bir kart varsa (profil, ayarlar, stars, liderlik, kutu...) yeni kart açılamaz; üst bar ve yan butonlar arka planda kalır
-    const CARD_EL = [nameCard, settingsCard, starsCard, lbModal, boxInfoModal, boxOpeningModal, $('codeConfirmModal')];
+    // Açık bir kart varsa (profil, ayarlar, stars, arenalar, liderlik, kutu...) yeni kart açılamaz; üst bar ve yan butonlar arka planda kalır
+    const CARD_EL = [nameCard, settingsCard, starsCard, $('arenasCard'), lbModal, boxInfoModal, boxOpeningModal, $('codeConfirmModal')];
     function anyCardOpen() { return CARD_EL.some(c => !c.classList.contains('hidden')); }
     const cardObs = new MutationObserver(() => gameWrap.classList.toggle('card-open', anyCardOpen()));
     CARD_EL.forEach(c => cardObs.observe(c, { attributes: true, attributeFilter: ['class'] }));
@@ -1731,6 +1793,1331 @@
     }
     window.addEventListener('resize', pcFit);
     pcFit();
+</script>
+
+<script>
+    /* ===== ARENALAR + BORU MODELLERİ + ARENA SEÇİMİ ===== */
+    const mk = (g1, g2, g3, b, c) => ({ grad1: g1, grad2: g2, grad3: g3, border: b, cap: c });
+    const DEFPAL = mk('#0284c7', '#38bdf8', '#0369a1', '#0c4a6e', '#eab308');
+    const ARENAS = [
+      { min: 0,     icon: '🌙', name: 'GECE STADYUMU',     desc: 'Klasik borular (karakter renginde)', sky: ['#020617', '#0f172a', '#064e3b'], g: ['#15803d', '#166534'], style: 'plain' },
+      { min: 500,   icon: '🌇', name: 'GÜN BATIMI',        desc: 'Tuğla borular',                      sky: ['#7c2d12', '#c2410c', '#fbbf24'], g: ['#b45309', '#92400e'], style: 'brick', pal: mk('#7c2d12', '#fb923c', '#431407', '#1c0a03', '#fde68a') },
+      { min: 1500,  icon: '🧊', name: 'BUZ ARENA',         desc: 'Buz sarkıtlı borular',               sky: ['#0c4a6e', '#38bdf8', '#e0f2fe'], g: ['#7dd3fc', '#bae6fd'], style: 'ice',   pal: mk('#0369a1', '#7dd3fc', '#0c4a6e', '#082f49', '#e0f2fe') },
+      { min: 3000,  icon: '🌆', name: 'NEON ŞEHİR',        desc: 'Parlayan neon borular',              sky: ['#1e1b4b', '#581c87', '#0f172a'], g: ['#312e81', '#1e1b4b'], style: 'neon',  pal: mk('#4c1d95', '#a855f7', '#2e1065', '#e879f9', '#22d3ee') },
+      { min: 5000,  icon: '🌋', name: 'LAV ARENA',         desc: 'Çatlaklarından lav akan borular',    sky: ['#450a0a', '#7f1d1d', '#ea580c'], g: ['#431407', '#7c2d12'], style: 'lava',  pal: mk('#1c1917', '#44403c', '#0c0a09', '#7c2d12', '#f97316') },
+      { min: 7500,  icon: '🌿', name: 'DİKENLİ VADİ',      desc: 'Dikenli borular (uçlar çarpar)',     sky: ['#022c22', '#064e3b', '#14532d'], g: ['#14532d', '#052e16'], style: 'thorn', pal: mk('#14532d', '#4d7c0f', '#052e16', '#022c22', '#a16207') },
+      { min: 10000, icon: '⚙️', name: 'TESTERE FABRİKASI', desc: 'Dönen testereli borular (çarpar)',   sky: ['#18181b', '#3f3f46', '#71717a'], g: ['#52525b', '#3f3f46'], style: 'saw',   pal: mk('#3f3f46', '#a1a1aa', '#27272a', '#09090b', '#dc2626') },
+      { min: 14000, icon: '🌹', name: 'GÜL BAHÇESİ',       desc: 'Dikenli sarmaşıklı taş sütunlar',    sky: ['#e4eddc', '#c9dac6', '#a3bca6'], g: ['#6f9a63', '#5f8955'], style: 'rose',  pal: mk('#2f4446', '#6c8b88', '#283b3d', '#14222a', '#3b5456') }
+    ];
+    let openList = [0], arenaSel = getStoredData('fs_arena', 'auto'), lastArena = null, banner = 0;
+
+    function isArenaOpen(i) { return isCheat() || calculateTotalTrophies() >= ARENAS[i].min; }
+    function refreshArenas() {
+      const t = calculateTotalTrophies(), ch = isCheat();
+      openList = ARENAS.map((a, i) => i).filter(i => ch || t >= ARENAS[i].min);
+      if (arenaSel !== 'auto' && !openList.includes(parseInt(arenaSel, 10))) { arenaSel = 'auto'; setStoredData('fs_arena', 'auto'); }
+      dirty = true;
+    }
+    // Seçili arena varsa o; "otomatik"te açık arenalar arasında her 15 golde bir değişir (başlangıç: en yüksek açık arena)
+    function curArena() {
+      if (arenaSel !== 'auto') return ARENAS[parseInt(arenaSel, 10)];
+      const n = openList.length;
+      return ARENAS[openList[(n - 1 + Math.floor(score / 15)) % n]];
+    }
+    refreshArenas();
+
+    const _uiU = updateUI;
+    updateUI = function () { _uiU(); refreshArenas(); };
+    const _sgA = startGame;
+    startGame = function () { refreshArenas(); lastArena = null; banner = 0; _sgA(); };
+
+    /* --- Gül bahçesi arka planı (bir kez çizilip saklanır) --- */
+    let roseBgCv = null;
+    function drawRoseFlower(c, x, y, r, col, al) {
+      c.save(); c.globalAlpha = al;
+      c.fillStyle = '#6f9462';
+      for (let i = 0; i < 3; i++) { const an = i * 2.1 + 1; c.beginPath(); c.ellipse(x + Math.cos(an) * r * 1.15, y + Math.sin(an) * r * 1.15, r * .6, r * .28, an, 0, 7); c.fill(); }
+      c.fillStyle = col[0]; c.strokeStyle = col[1]; c.lineWidth = 1.2;
+      c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); c.stroke();
+      for (let k = 1; k <= 3; k++) { c.beginPath(); c.arc(x + (k % 2 ? 1 : -1) * r * .05, y, r * (1 - k * .22), .4 * k, Math.PI * 1.6 + .4 * k); c.stroke(); }
+      c.beginPath(); c.arc(x, y, r * .12, 0, 7); c.fillStyle = col[1]; c.fill();
+      c.restore();
+    }
+    function buildRoseBg() {
+      const S = 1.5, cv = document.createElement('canvas'); cv.width = GAME_WIDTH * S; cv.height = GAME_HEIGHT * S;
+      const c = cv.getContext('2d'); c.scale(S, S);
+      let seed = 11; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+      const g = c.createLinearGradient(0, 0, 0, GAME_HEIGHT);
+      g.addColorStop(0, '#e4eddc'); g.addColorStop(.55, '#c9dac6'); g.addColorStop(1, '#a3bca6');
+      c.fillStyle = g; c.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+      const gl = c.createRadialGradient(200, 230, 10, 200, 230, 240);
+      gl.addColorStop(0, 'rgba(255,255,245,.9)'); gl.addColorStop(1, 'rgba(255,255,245,0)');
+      c.fillStyle = gl; c.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+      // silik sarmaşıklar
+      c.lineCap = 'round';
+      for (let i = 0; i < 10; i++) {
+        const x0 = rnd() * 400, y0 = 120 + rnd() * 440;
+        c.strokeStyle = 'rgba(78,108,92,.2)'; c.lineWidth = 2 + rnd() * 2;
+        c.beginPath(); c.moveTo(x0, y0);
+        c.bezierCurveTo(x0 + (rnd() - .5) * 120, y0 - 60, x0 + (rnd() - .5) * 160, y0 - 130, x0 + (rnd() - .5) * 90, y0 - 210); c.stroke();
+      }
+      // yapraklar
+      for (let i = 0; i < 26; i++) {
+        const left = rnd() < .5, x = left ? rnd() * 120 : 280 + rnd() * 120, y = rnd() * 560, an = rnd() * 6;
+        c.fillStyle = `rgba(${90 + (rnd() * 30 | 0)},${130 + (rnd() * 30 | 0)},${95},.55)`;
+        c.beginPath(); c.ellipse(x, y, 16, 7, an, 0, 7); c.fill();
+      }
+      // güller: kenarlarda belirgin, ortada silik
+      const cols = [['#f7b6c8', '#e58aa5'], ['#f6f4ee', '#d9d6cc'], ['#d92b48', '#a3162f'], ['#f4a9bd', '#dd7f9c']];
+      for (let i = 0; i < 24; i++) {
+        const left = rnd() < .5, x = left ? rnd() * 95 : 305 + rnd() * 95, y = 10 + rnd() * 540;
+        drawRoseFlower(c, x, y, 16 + rnd() * 16, cols[(rnd() * 4) | 0], .6 + rnd() * .3);
+      }
+      for (let i = 0; i < 7; i++) drawRoseFlower(c, 110 + rnd() * 180, 30 + rnd() * 500, 14 + rnd() * 10, cols[(rnd() * 4) | 0], .16 + rnd() * .12);
+      roseBgCv = cv;
+    }
+
+    /* --- Arka plan + zemin --- */
+    const skyCache = {};
+    drawStadiumBackground = function () {
+      const a = curArena();
+      if (a.style === 'rose') { if (!roseBgCv) buildRoseBg(); ctx.drawImage(roseBgCv, 0, 0, GAME_WIDTH, GAME_HEIGHT); return; }
+      let g = skyCache[a.name];
+      if (!g) { g = ctx.createLinearGradient(0, 0, 0, GAME_HEIGHT); g.addColorStop(0, a.sky[0]); g.addColorStop(.6, a.sky[1]); g.addColorStop(1, a.sky[2]); skyCache[a.name] = g; }
+      ctx.fillStyle = g; ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+      ctx.fillStyle = 'rgba(255,255,255,.05)';
+      ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(0, 280); ctx.lineTo(120, 280); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(370, 0); ctx.lineTo(280, 280); ctx.lineTo(400, 280); ctx.fill();
+    };
+    drawPitch = function () {
+      const a = curArena(), gy = GAME_HEIGHT - GROUND_HEIGHT;
+      ctx.fillStyle = a.g[0]; ctx.fillRect(0, gy, GAME_WIDTH, GROUND_HEIGHT);
+      if (gameState === 'PLAYING') pitchOffset = (pitchOffset + PIPE_SPEED) % 28;
+      ctx.fillStyle = a.g[1]; for (let x = -pitchOffset; x < GAME_WIDTH + 28; x += 28) ctx.fillRect(x, gy, 14, GROUND_HEIGHT);
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, gy, GAME_WIDTH, 4);
+    };
+
+    /* --- Çizim yardımcıları --- */
+    function tri(x1, y1, x2, y2, x3, y3, f, s) {
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.lineTo(x3, y3); ctx.closePath();
+      ctx.fillStyle = f; ctx.fill(); if (s) { ctx.strokeStyle = s; ctx.lineWidth = 1; ctx.stroke(); }
+    }
+    function spikes(x, w, ey, dir, n, sz, f, s) { const k = w / n; for (let i = 0; i < n; i++) tri(x + i * k, ey, x + (i + 1) * k, ey, x + (i + .5) * k, ey + dir * sz, f, s); }
+    function gear(cx, cy, r, rot) {
+      ctx.beginPath();
+      for (let i = 0; i < 20; i++) { const an = rot + i * Math.PI / 10, rr = i % 2 ? r * .72 : r; ctx[i ? 'lineTo' : 'moveTo'](cx + Math.cos(an) * rr, cy + Math.sin(an) * rr); }
+      ctx.closePath(); ctx.fillStyle = '#d4d4d8'; ctx.fill(); ctx.strokeStyle = '#3f3f46'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, r * .3, 0, 7); ctx.fillStyle = '#dc2626'; ctx.fill();
+    }
+    function pBody(x, y, w, h, c, st, t) {
+      const g = ctx.createLinearGradient(x, 0, x + w, 0);
+      g.addColorStop(0, c.grad1); g.addColorStop(.5, c.grad2); g.addColorStop(1, c.grad3);
+      ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+      ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+      const y0 = Math.floor(y / 14) * 14;
+      if (st === 'brick') {
+        ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1.5; ctx.beginPath();
+        for (let yy = y0; yy < y + h; yy += 14) { ctx.moveTo(x, yy); ctx.lineTo(x + w, yy); const o = (yy / 14) % 2 ? 13 : 33; ctx.moveTo(x + o, yy); ctx.lineTo(x + o, yy + 14); }
+        ctx.stroke();
+      } else if (st === 'ice') {
+        ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.fillRect(x + 8, y, 6, h); ctx.fillRect(x + w - 14, y, 3, h);
+      } else if (st === 'lava') {
+        ctx.lineWidth = 2;
+        for (let yy = y0; yy < y + h; yy += 42) {
+          ctx.strokeStyle = `rgba(251,146,60,${.65 + .35 * Math.sin(t * 4 + yy)})`;
+          ctx.beginPath(); ctx.moveTo(x + 8, yy); ctx.lineTo(x + 24, yy + 14); ctx.lineTo(x + 14, yy + 28); ctx.lineTo(x + 40, yy + 42); ctx.stroke();
+        }
+      } else if (st === 'saw') {
+        ctx.fillStyle = '#18181b';
+        for (let yy = y0 + 10; yy < y + h; yy += 28) { ctx.fillRect(x + 6, yy, 5, 5); ctx.fillRect(x + w - 11, yy, 5, 5); }
+      } else if (st === 'thorn') {
+        ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 2; ctx.beginPath();
+        for (let yy = y0; yy < y + h; yy += 14) { ctx.moveTo(x + 6, yy); ctx.lineTo(x + w - 6, yy + 7); }
+        ctx.stroke();
+      }
+      ctx.restore();
+      if (st === 'neon') { ctx.strokeStyle = 'rgba(232,121,249,.3)'; ctx.lineWidth = 6; ctx.strokeRect(x, y, w, h); }
+      ctx.strokeStyle = c.border; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
+      if (st === 'thorn') {
+        for (let yy = y + 8; yy < y + h - 14; yy += 26) {
+          tri(x, yy, x - 7, yy + 5, x, yy + 10, '#78350f', '#1c0a03');
+          tri(x + w, yy + 13, x + w + 7, yy + 18, x + w, yy + 23, '#78350f', '#1c0a03');
+        }
+      }
+    }
+    function pCap(x, w, ey, dir, c, st, t) {
+      const cy = dir > 0 ? ey - 18 : ey;
+      ctx.fillStyle = c.cap; ctx.fillRect(x - 3, cy, w + 6, 18);
+      ctx.strokeStyle = c.border; ctx.lineWidth = 2; ctx.strokeRect(x - 3, cy, w + 6, 18);
+      if (st === 'thorn') spikes(x - 3, w + 6, ey, dir, 5, 8, '#d4d4d8', '#27272a');
+      else if (st === 'ice') spikes(x - 3, w + 6, ey, dir, 4, 9, '#e0f2fe', '#0369a1');
+      else if (st === 'saw') gear(x + w / 2, ey - dir * 4, 17, t * 5 * dir);
+    }
+
+    /* --- GÜL BAHÇESİ: dikenli sarmaşığa sarılı taş sütun --- */
+    const VP = 48; let vineTile = null;
+    function buildVineTile() {
+      const S = 2, W = 78, cx = W / 2, amp = 29, cv = document.createElement('canvas');
+      cv.width = W * S; cv.height = VP * S;
+      const c = cv.getContext('2d'); c.scale(S, S); c.lineCap = 'round'; c.lineJoin = 'round';
+      [0, Math.PI].forEach(ph => {
+        const X = u => cx + amp * Math.sin(2 * Math.PI * u / VP + ph);
+        // sarmaşık gövdesi
+        c.beginPath();
+        for (let u = -10; u <= VP + 10; u += 2) c[u === -10 ? 'moveTo' : 'lineTo'](X(u), u);
+        c.strokeStyle = '#162326'; c.lineWidth = 5; c.stroke();
+        c.strokeStyle = '#3a5154'; c.lineWidth = 1.5; c.stroke();
+        // dikenler
+        for (let u = -12 + (ph ? 6 : 0), k = 0; u <= VP + 12; u += 12, k++) {
+          const px = X(u), dx = amp * Math.cos(2 * Math.PI * u / VP + ph) * 2 * Math.PI / VP, len = Math.hypot(dx, 1);
+          const nx = 1 / len, ny = -dx / len, sg = (px - cx) >= 0 ? 1 : -1, tx = dx / len, ty = 1 / len;
+          tri(px + tx * 3, u + ty * 3, px - tx * 3, u - ty * 3, px + nx * sg * 8, u + ny * sg * 8, '#7a5a73', '#2a1a26');
+        }
+      });
+      vineTile = cv;
+    }
+    function roseVine(x, top, bot, anchor, dir) {
+      if (bot <= top) return;
+      if (!vineTile) buildVineTile();
+      ctx.save(); ctx.beginPath(); ctx.rect(x - 12, top, 78, bot - top); ctx.clip();
+      if (dir > 0) for (let y = anchor; y < bot; y += VP) ctx.drawImage(vineTile, x - 12, y, 78, VP);
+      else for (let y = anchor - VP; y > top - VP; y -= VP) ctx.drawImage(vineTile, x - 12, y, 78, VP);
+      ctx.restore();
+    }
+    function roseBody(x, y, w, h) {
+      if (h <= 0) return;
+      const g = ctx.createLinearGradient(x, 0, x + w, 0);
+      g.addColorStop(0, '#2f4446'); g.addColorStop(.45, '#6c8b88'); g.addColorStop(1, '#283b3d');
+      ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+      ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fillRect(x + 9, y, w - 18, h);
+      ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.fillRect(x + 8, y, 2, h); ctx.fillRect(x + w - 10, y, 2, h);
+      ctx.strokeStyle = '#14222a'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
+    }
+    function roseNeck(x, w, ny) {
+      ctx.fillStyle = '#3b5456'; ctx.fillRect(x + 3, ny, w - 6, 18);
+      ctx.strokeStyle = '#14222a'; ctx.lineWidth = 1.5; ctx.strokeRect(x + 3, ny, w - 6, 18);
+      ctx.fillStyle = '#5b7c79';
+      [x + 13, x + w / 2, x + w - 13].forEach(px => { ctx.beginPath(); ctx.arc(px, ny + 9, 5, 0, 7); ctx.fill(); ctx.stroke(); });
+    }
+    function roseCapBlock(x, w, cy) {
+      const g = ctx.createLinearGradient(0, cy, 0, cy + 16);
+      g.addColorStop(0, '#506b6d'); g.addColorStop(1, '#2c4042');
+      ctx.fillStyle = g; ctx.fillRect(x - 6, cy, w + 12, 16);
+      ctx.strokeStyle = '#14222a'; ctx.lineWidth = 2; ctx.strokeRect(x - 6, cy, w + 12, 16);
+      ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(x - 4, cy + 2, w + 8, 3);
+    }
+    function drawRosePipe(p, fl) {
+      // üst sütun: başlık aşağıda, sarmaşık yukarı doğru
+      roseBody(p.x, 0, p.width, p.topHeight);
+      roseNeck(p.x, p.width, p.topHeight - 34);
+      roseVine(p.x, 0, p.topHeight - 16, p.topHeight - 16, -1);
+      roseCapBlock(p.x, p.width, p.topHeight - 16);
+      // alt sütun: başlık yukarıda, sarmaşık aşağı doğru
+      roseBody(p.x, p.bottomY, p.width, fl - p.bottomY);
+      roseNeck(p.x, p.width, p.bottomY + 16);
+      roseVine(p.x, p.bottomY + 16, fl, p.bottomY + 16, 1);
+      roseCapBlock(p.x, p.width, p.bottomY);
+    }
+
+    drawPipes = function () {
+      const a = curArena(), c = a.pal || activeStarCache.pipeColors || DEFPAL;
+      const t = performance.now() / 1000, fl = GAME_HEIGHT - GROUND_HEIGHT;
+      if (a !== lastArena) { lastArena = a; banner = 130; }
+      pipes.forEach(p => {
+        if (a.style === 'rose') { drawRosePipe(p, fl); return; }
+        pBody(p.x, 0, p.width, p.topHeight, c, a.style, t);
+        pBody(p.x, p.bottomY, p.width, fl - p.bottomY, c, a.style, t);
+        pCap(p.x, p.width, p.topHeight, 1, c, a.style, t);
+        pCap(p.x, p.width, p.bottomY, -1, c, a.style, t);
+      });
+    };
+
+    /* --- Diken / testere uçları gerçekten çarpar --- */
+    const _ccA = checkCollisions;
+    checkCollisions = function () {
+      if (_ccA()) return true;
+      const ex = { thorn: 5, saw: 8 }[curArena().style]; if (!ex) return false;
+      const hr = player.hitRadius;
+      for (const p of pipes) if (player.x + hr > p.x && player.x - hr < p.x + p.width && (player.y - hr < p.topHeight + ex || player.y + hr > p.bottomY - ex)) return true;
+      return false;
+    };
+
+    /* --- Arena adı yazısı --- */
+    const _hudA = drawScoreHUD;
+    drawScoreHUD = function () {
+      _hudA();
+      if (banner > 0 && lastArena && (gameState === 'PLAYING' || gameState === 'RESUMING' || gameState === 'PAUSED')) {
+        if (gameState === 'PLAYING') banner--;
+        ctx.save(); ctx.globalAlpha = Math.min(1, banner / 30);
+        ctx.font = '700 30px "Teko",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000'; ctx.lineWidth = 4;
+        const s = tx('ARENA: ' + lastArena.name); ctx.strokeText(s, 200, 112); ctx.fillText(s, 200, 112);
+        ctx.restore();
+      }
+    };
+
+    /* --- ARENALAR menüsü (STARS'ın altındaki buton) --- */
+    const arenasCard = $('arenasCard'), arenasList = $('arenasList');
+    function arenaThumb(a) {
+      const p = a.pal || DEFPAL;
+      const pipe = `background:linear-gradient(90deg,${p.grad1},${p.grad2},${p.grad3});border:1px solid ${p.border}`;
+      return `<div class="w-14 h-14 rounded-xl overflow-hidden border border-white/20 relative flex-shrink-0" style="background:linear-gradient(180deg,${a.sky[0]},${a.sky[1]} 60%,${a.sky[2]})">
+        <div class="absolute bottom-0 left-0 right-0 h-3" style="background:${a.g[0]}"></div>
+        <div class="absolute right-3 top-0 w-3 h-5" style="${pipe}"></div>
+        <div class="absolute right-3 bottom-3 w-3 h-5" style="${pipe}"></div>
+      </div>`;
+    }
+    function renderArenasList() {
+      refreshArenas();
+      const tot = calculateTotalTrophies();
+      $('arenasCount').textContent = `${openList.length}/${ARENAS.length}`;
+      const btn = (isSel, ok, key, need) => isSel
+        ? '<span class="text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-3 py-1 rounded-lg">SEÇİLDİ</span>'
+        : ok ? `<button onclick="selectArena('${key}')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-lg">SEÇ</button>`
+        : `<button onclick="selectArena('${key}')" class="text-xs font-bold bg-slate-700 text-amber-300 px-3 py-1 rounded-lg border border-amber-500/50">🔒 ${need}</button>`;
+      const cls = s => `p-2.5 rounded-xl border cursor-pointer transition ${s ? 'bg-emerald-900/30 border-emerald-400' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'}`;
+      let html = `<div onclick="selectArena('auto')" class="${cls(arenaSel === 'auto')}"><div class="flex items-center gap-3">
+          <div class="w-14 h-14 rounded-xl border border-white/20 bg-slate-800 flex items-center justify-center text-2xl flex-shrink-0">🔀</div>
+          <div class="text-left min-w-0 flex-1"><div class="font-salah text-lg leading-tight text-white">OTOMATİK</div>
+          <div class="text-[10px] text-sky-300 font-bold">Açık arenalar her 15 golde değişir</div></div>
+          <div class="flex-shrink-0">${btn(arenaSel === 'auto', true, 'auto', '')}</div></div></div>`;
+      ARENAS.forEach((a, i) => {
+        const ok = isArenaOpen(i), sel = arenaSel === String(i);
+        html += `<div onclick="selectArena('${i}')" class="${cls(sel)} ${ok ? '' : 'opacity-70'}"><div class="flex items-center gap-3">
+          ${arenaThumb(a)}
+          <div class="text-left min-w-0 flex-1"><div class="font-salah text-lg leading-tight text-white truncate">${a.name}</div>
+          <div class="text-[10px] text-sky-300 font-bold truncate">${a.desc}</div>
+          <div class="text-[11px] font-bold ${ok ? 'text-emerald-300' : 'text-amber-300'}">${ok ? 'AÇIK' : `${tot} / ${a.min} 🏆`}</div></div>
+          <div class="flex-shrink-0">${btn(sel, ok, String(i), a.min + ' 🏆')}</div></div></div>`;
+      });
+      arenasList.innerHTML = html;
+    }
+    window.selectArena = function (v) {
+      if (v !== 'auto' && !isArenaOpen(parseInt(v, 10))) { alert(`Bu arena kilitli! Toplam ${ARENAS[parseInt(v, 10)].min} kupa gerekiyor.`); return; }
+      arenaSel = String(v); setStoredData('fs_arena', arenaSel);
+      lastArena = null; dirty = true; triggerVibration(15);
+      renderArenasList();
+    };
+    $('openArenasBtn').addEventListener('click', e => {
+      e.stopPropagation(); if (anyCardOpen()) return;
+      renderArenasList(); startCard.classList.add('hidden'); arenasCard.classList.remove('hidden');
+    });
+    const closeArenas = () => { arenasCard.classList.add('hidden'); startCard.classList.remove('hidden'); };
+    $('closeArenasBtn').addEventListener('click', closeArenas);
+    $('continueArenasBtn').addEventListener('click', closeArenas);
+
+    /* --- Ana ekranda karaktere / ismine tıklayınca STARS açılsın --- */
+    [activeStarImg.parentElement, activeStarName].forEach(el => {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', e => { e.stopPropagation(); openStarsBtn.click(); });
+    });
+    dirty = true;
+</script>
+
+<style>
+    .record-glow { border-color: #facc15 !important; box-shadow: 0 0 30px rgba(250,204,21,.6), 0 0 80px rgba(250,204,21,.3); }
+</style>
+<script>
+    let pipeIdx = 0, recordBroken = false, newRecordRun = false, recordFlash = 0;
+    const starPng = new Image(); starPng.src = 'yildiz.png';
+
+    // Rekor sesi: rekor.mp3 varsa onu çalar, yoksa kendi yaptığı yükselen "ding" sesini çalar
+    SoundEffects.prototype.playRecord = function () {
+        if (isSfxMuted || sfxVolume <= 0) return;
+        const a = new Audio('rekor.mp3'); a.volume = sfxVolume;
+        a.play().catch(() => {
+            this.init();
+            [659.25, 783.99, 987.77, 1318.51, 1567.98].forEach((f, i) => this.tone('triangle', f, f, 0.28, 0.35, i * 0.09));
+            [1318.51, 1567.98, 1975.53].forEach(f => this.tone('sine', f, f, 0.22, 0.9, 0.5));
+        });
+    };
+
+    // Boru numarası (rekorun olduğu boruyu bulmak için)
+    const _createPipe = createPipe;
+    createPipe = function () { _createPipe(); pipes[pipes.length - 1].idx = ++pipeIdx; };
+    const _startGame = startGame;
+    startGame = function () { pipeIdx = 0; recordBroken = false; newRecordRun = false; recordFlash = 0; _startGame(); };
+
+    // Rekor kırılınca ses + titreşim + ekranda yazı
+    const _updatePipes = updatePipes;
+    updatePipes = function (dt, ds) {
+        const before = score;
+        _updatePipes(dt, ds);
+        if (score > before && !recordBroken && highScore > 0 && score > highScore) {
+            recordBroken = true; newRecordRun = true; recordFlash = 110;
+            sounds.playRecord(); triggerVibration(150);
+        }
+    };
+
+    // Eski rekorunun olduğu borunun aralığına yıldız koy
+    function drawRecordStar(pipe) {
+        const cx = pipe.x + pipe.width / 2, cy = (pipe.topHeight + pipe.bottomY) / 2;
+        const s = 34 + Math.sin(performance.now() / 200) * 3;
+        ctx.save(); ctx.translate(cx, cy);
+        if (starPng.complete && starPng.naturalWidth) ctx.drawImage(starPng, -s / 2, -s / 2, s, s);
+        else {
+            ctx.fillStyle = '#FFD700'; ctx.strokeStyle = '#854d0e'; ctx.lineWidth = 2; ctx.beginPath();
+            for (let i = 0; i < 10; i++) { const r = i % 2 ? s * 0.22 : s * 0.5, a = -Math.PI / 2 + i * Math.PI / 5; ctx[i ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r); }
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+        }
+        ctx.restore();
+    }
+    const _drawPipes = drawPipes;
+    drawPipes = function () {
+        _drawPipes();
+        if (highScore > 0) pipes.forEach(p => { if (p.idx === highScore) drawRecordStar(p); });
+    };
+
+    // "YENİ REKOR!" yazısı
+    const _drawScoreHUD = drawScoreHUD;
+    drawScoreHUD = function () {
+        _drawScoreHUD();
+        if (recordFlash > 0) {
+            if (gameState === 'PLAYING') recordFlash--;
+            ctx.save();
+            ctx.globalAlpha = Math.min(1, recordFlash / 30);
+            ctx.font = '700 56px "Teko", sans-serif'; ctx.textAlign = 'center';
+            ctx.fillStyle = '#FFD700'; ctx.strokeStyle = '#000'; ctx.lineWidth = 5;
+            ctx.strokeText('YENİ REKOR!', GAME_WIDTH / 2, 150); ctx.fillText('YENİ REKOR!', GAME_WIDTH / 2, 150);
+            ctx.restore();
+        }
+    };
+
+    // Rekorla biten oyunda daha coşkulu bitiş ekranı
+    const _triggerGameOver = triggerGameOver;
+    triggerGameOver = function () {
+        const s = score, old = highScore, rec = newRecordRun;
+        _triggerGameOver();
+        const h = gameOverCard.querySelector('h2'), p = gameOverCard.querySelector('p');
+        if (rec) {
+            h.textContent = '🏆 YENİ REKOR!';
+            h.className = 'text-5xl font-salah text-yellow-300 mb-1 leading-none animate-pulse';
+            p.textContent = `✨ Eski rekor ${old} → Yeni rekor ${s} gol ✨`;
+            p.className = 'text-[12px] text-amber-300 font-bold mb-3';
+            gameOverCard.classList.add('record-glow');
+            setTimeout(() => sounds.playFanfare(), 300);
+        } else {
+            h.textContent = 'KIRMIZI KART!';
+            h.className = 'text-4xl font-salah text-red-500 mb-1 leading-none';
+            p.textContent = 'Defansa Takıldın';
+            p.className = 'text-[11px] text-slate-400 font-semibold mb-3';
+            gameOverCard.classList.remove('record-glow');
+        }
+        newRecordRun = false;
+    };
+</script>
+<script>
+    /* ===== GÜL BAHÇESİ: FOTOĞRAFLI ARENA (yama) ===== */
+    const AR_IMG = {};
+    function arImg(src) {
+        if (!AR_IMG[src]) { const i = new Image(); i.onload = () => { dirty = true; }; i.src = src; AR_IMG[src] = i; }
+        return AR_IMG[src];
+    }
+    const arOk = i => i && i.complete && i.naturalWidth > 0;
+
+    (function () {
+        // Gece Stadyumu (ilk arena) eski kodla çizilmeye devam eder; diğerleri fotoğraflı.
+        // ust/alt: gövdeden tekrarlanacak satırlar [başlangıç, bitiş] (görsel pikseli)
+        const CFG = [
+            ['GÜN BATIMI',        'gun',     [6, 190],  [70, 254],  { zemin: 'assets/arena_gun_zemin.png' }],
+            ['BUZ ARENA',         'buz',     [6, 190],  [70, 254]],
+            ['NEON ŞEHİR',        'neon',    [6, 190],  [70, 254],  { zemin: 'assets/arena_neon_zemin.png' }],
+            ['LAV ARENA',         'lav',     [6, 190],  [70, 254]],
+            ['DİKENLİ VADİ',      'vadi',    [4, 213],  [150, 359], { noPitch: true }],   // zemin resmin içinde
+            ['TESTERE FABRİKASI', 'testere', [6, 190],  [70, 254],  { style: 'plain', zemin: 'assets/arena_testere_zemin.png' }],  // ekstra çarpma payı kalksın
+            ['GÜL BAHÇESİ',       'gul',     [8, 128],  [106, 226]]
+        ];
+        CFG.forEach(([name, k, bu, ba, extra]) => {
+            const a = ARENAS.find(x => x.name === name); if (!a) return;
+            Object.assign(a, { bg: `assets/arena_${k}_bg.jpg`, ust: `assets/arena_${k}_ust.png`, alt: `assets/arena_${k}_alt.png`, bodyUst: bu, bodyAlt: ba }, extra || {});
+            arImg(a.bg); arImg(a.ust); arImg(a.alt); if (a.zemin) arImg(a.zemin);
+        });
+    })();
+
+    const AR_BG_OPACITY = 0.7;
+    const ARENA_BG_OPACITY = {
+        'GÜN BATIMI': 0.45,
+        'NEON ŞEHİR': 0.40,
+        'LAV ARENA': 0.45,
+        'DİKENLİ VADİ': 0.45,
+        'TESTERE FABRİKASI': 0.45,
+        'GÜL BAHÇESİ': 0.40
+    };
+    ARENAS.forEach(a => { if (ARENA_BG_OPACITY[a.name] !== undefined) a.bgOpacity = ARENA_BG_OPACITY[a.name]; });
+    const PIPE_IMG_SCALE = 0.5;   // görseller 2x hazırlandı
+
+    function arSlice(img, b0, b1, x, dy, w, dh, flip) {
+        const iw = img.naturalWidth;
+        if (!flip) { ctx.drawImage(img, 0, b0, iw, b1 - b0, x, dy, w, dh); return; }
+        ctx.save(); ctx.translate(0, dy + dh); ctx.scale(1, -1);
+        ctx.drawImage(img, 0, b0, iw, b1 - b0, x, 0, w, dh);
+        ctx.restore();
+    }
+    function arTopPipe(img, br, cx, L) {
+        const w = img.naturalWidth * PIPE_IMG_SCALE, h = img.naturalHeight * PIPE_IMG_SCALE, x = cx - w / 2;
+        ctx.save(); ctx.beginPath(); ctx.rect(0, 0, GAME_WIDTH, L); ctx.clip();
+        ctx.drawImage(img, x, L - h, w, h);
+        const bh = (br[1] - br[0]) * PIPE_IMG_SCALE; let y = L - h, flip = true;
+        while (y > 0) { arSlice(img, br[0], br[1], x, y - bh, w, bh, flip); y -= bh; flip = !flip; }
+        ctx.restore();
+    }
+    function arBottomPipe(img, br, cx, yB, fl) {
+        const w = img.naturalWidth * PIPE_IMG_SCALE, h = img.naturalHeight * PIPE_IMG_SCALE, x = cx - w / 2;
+        ctx.save(); ctx.beginPath(); ctx.rect(0, yB, GAME_WIDTH, fl - yB); ctx.clip();
+        ctx.drawImage(img, x, yB, w, h);
+        const bh = (br[1] - br[0]) * PIPE_IMG_SCALE; let y = yB + h, flip = true;
+        while (y < fl) { arSlice(img, br[0], br[1], x, y, w, bh, flip); y += bh; flip = !flip; }
+        ctx.restore();
+    }
+    function arenaImgReady(a) { return a.bg && arOk(arImg(a.bg)) && arOk(arImg(a.ust)) && arOk(arImg(a.alt)); }
+
+    const _arBg = drawStadiumBackground;
+    drawStadiumBackground = function () {
+        const a = curArena();
+        if (a.bg && arOk(arImg(a.bg))) {
+            ctx.fillStyle = '#0a0f1c'; ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            ctx.globalAlpha = (a.bgOpacity !== undefined) ? a.bgOpacity : 0.7;
+            ctx.drawImage(arImg(a.bg), 0, 0, GAME_WIDTH, GAME_HEIGHT);
+            ctx.globalAlpha = 1;
+            return;
+        }
+        _arBg();
+    };
+    let _gT = performance.now(), _gOff = 0;
+    drawPitch = function () {
+        const a = curArena(), gy = GAME_HEIGHT - GROUND_HEIGHT;
+        const now = performance.now(), dt = Math.min((now - _gT) / 1000, 0.033); _gT = now;
+        if (gameState === 'PLAYING') _gOff = (_gOff + PIPE_SPEED * dt * 60) % 56;   // borularla aynı hız
+        if (a.noPitch && arOk(arImg(a.bg))) return;
+        const tile = a.zemin ? arImg(a.zemin) : null;
+        if (arOk(tile)) { for (let x = -_gOff; x < GAME_WIDTH; x += 56) ctx.drawImage(tile, Math.floor(x), gy, 57, GROUND_HEIGHT); return; }
+        ctx.fillStyle = a.g[0]; ctx.fillRect(0, gy, GAME_WIDTH, GROUND_HEIGHT);
+        ctx.fillStyle = a.g[1]; for (let x = -(_gOff % 28); x < GAME_WIDTH + 28; x += 28) ctx.fillRect(x, gy, 14, GROUND_HEIGHT);
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, gy, GAME_WIDTH, 4);
+    };
+    const _arPipes = drawPipes;
+    drawPipes = function () {
+        const a = curArena();
+        if (!arenaImgReady(a)) { _arPipes(); return; }
+        if (a !== lastArena) { lastArena = a; banner = 130; }
+        const fl = a.noPitch ? GAME_HEIGHT : GAME_HEIGHT - GROUND_HEIGHT, iu = arImg(a.ust), ia = arImg(a.alt);   // vadi: alt borular ekranın en altından çıkar
+        pipes.forEach(p => {
+            const cx = p.x + p.width / 2;
+            arTopPipe(iu, a.bodyUst, cx, p.topHeight);
+            arBottomPipe(ia, a.bodyAlt, cx, p.bottomY, fl);
+        });
+        if (highScore > 0) pipes.forEach(p => { if (p.idx === highScore) drawRecordStar(p); });
+    };
+
+    /* Arenalar menüsündeki küçük resim */
+    const _arThumb = arenaThumb;
+    arenaThumb = function (a) {
+        if (!a.bg) return _arThumb(a);
+        return `<div class="w-14 h-14 rounded-xl overflow-hidden border border-white/20 relative flex-shrink-0" style="background:url(${a.bg}) center/cover"></div>`;
+    };
+    /* Oyuna girerken "ARENA: ..." yazısı çıkmasın */
+    const _arStart = startGame;
+    startGame = function () {
+        _arStart();
+        if (gameState === 'PLAYING') { lastArena = curArena(); banner = 0; }
+    };
+
+    /* OTOMATİK seçeneği kaldırıldı: hep bir arena seçili olsun */
+    const _arRefresh = refreshArenas;
+    refreshArenas = function () {
+        if (arenaSel === 'auto') { arenaSel = '0'; setStoredData('fs_arena', '0'); }
+        _arRefresh();
+        if (arenaSel === 'auto') { arenaSel = '0'; setStoredData('fs_arena', '0'); }
+    };
+    const _arRender = renderArenasList;
+    renderArenasList = function () {
+        _arRender();
+        const f = arenasList.firstElementChild;
+        if (f && f.textContent.indexOf('OTOMATİK') !== -1) f.remove();
+    };
+    refreshArenas();
+</script>
+<script>
+    /* ===== Menü butonlarının resimleri ===== */
+    function refreshMenuTiles() {
+        try {
+            const sa = $('tileStarArt'), ar = $('tileArenaArt');
+            if (sa && activeStarCache) sa.style.backgroundImage = `url("${formImg(activeStarCache, activeFormNum)}")`;
+            if (ar) {
+                const idx = parseInt(arenaSel, 10);
+                const a = ARENAS[isNaN(idx) ? 0 : idx] || ARENAS[0];
+                ar.style.backgroundImage = a.bg
+                    ? `url("${a.bg}")`
+                    : `linear-gradient(180deg, ${a.sky[0]}, ${a.sky[1]} 60%, ${a.sky[2]})`;
+            }
+        } catch (e) {}
+    }
+    const _mtUpdateUI = updateUI;
+    updateUI = function () { _mtUpdateUI(); refreshMenuTiles(); };
+    const _mtLoadStar = loadSelectedStar;
+    loadSelectedStar = function () { _mtLoadStar(); refreshMenuTiles(); };
+    const _mtSelectArena = window.selectArena;
+    window.selectArena = function (v) { _mtSelectArena(v); refreshMenuTiles(); };
+    refreshMenuTiles();
+</script>
+<script>
+    /* ================= MAĞAZA ================= */
+    const SHOP_TEST_MODE = false;   // true yaparsan ödeme olmadan hak verir (SADECE test için!)
+    const NOADS_PRICE = '30 ₺';
+    const SHOP_PACKS = [
+        { id: 'coins_500',   coins: 500,   price: '19,99 ₺',  icon: '🪙',     tag: '' },
+        { id: 'coins_1100',  coins: 1100,  price: '39,99 ₺',  icon: '🪙🪙',   tag: '' },
+        { id: 'coins_2500',  coins: 2500,  price: '69,99 ₺',  icon: '💰',     tag: 'POPÜLER' },
+        { id: 'coins_5500',  coins: 5500,  price: '119,99 ₺', icon: '💰💰',   tag: '' },
+        { id: 'coins_12000', coins: 12000, price: '199,99 ₺', icon: '🧰',     tag: 'EN İYİ DEĞER' },
+        { id: 'coins_28000', coins: 28000, price: '349,99 ₺', icon: '👑',     tag: '' }
+    ];
+    const shopModal = $('shopModal'), shopGrid = $('shopGrid'), noAdsBtn = $('noAdsBtn');
+    CARD_EL.push(shopModal);
+    cardObs.observe(shopModal, { attributes: true, attributeFilter: ['class'] });
+
+    function isNoAds() { return getStoredData('fs_noads', 'false') === 'true'; }   // reklam kodunda bunu kontrol et
+    window.isNoAds = isNoAds;
+
+    function renderShop() {
+        const owned = isNoAds();
+        noAdsBtn.disabled = owned;
+        noAdsBtn.onclick = () => buyItem('noads');
+        noAdsBtn.className = 'w-full flex items-center gap-3 p-2.5 rounded-xl border-2 text-left active:scale-95 transition ' +
+            (owned ? 'border-emerald-500/60 bg-emerald-950/50' : 'border-amber-400 bg-gradient-to-r from-amber-600/30 to-yellow-500/20');
+        noAdsBtn.innerHTML =
+            `<div class="w-12 h-12 rounded-xl bg-slate-900 border border-amber-400/60 flex items-center justify-center text-2xl flex-shrink-0">🚫</div>
+             <div class="flex-1 min-w-0">
+                <div class="font-salah text-xl leading-tight text-white">Reklamları Kapat</div>
+                <div class="text-[10px] text-sky-300 font-bold">Reklamlar kalıcı olarak kapatılır</div>
+             </div>
+             <div class="font-salah text-xl text-yellow-300 whitespace-nowrap">${owned ? 'SATIN ALINDI' : NOADS_PRICE}</div>`;
+        shopGrid.innerHTML = SHOP_PACKS.map(p => `
+            <button onclick="buyItem('${p.id}')" class="relative flex flex-col items-center gap-0.5 p-2 pt-3 rounded-xl border border-slate-700 bg-slate-900/90 active:scale-95 transition">
+                ${p.tag ? `<span class="absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-black bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full">${p.tag}</span>` : ''}
+                <div class="text-3xl leading-none">${p.icon}</div>
+                <div class="font-salah text-2xl leading-none text-purple-300 mt-1">${p.coins.toLocaleString('tr-TR')}</div>
+                <div class="w-full mt-1 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-salah text-lg leading-none">${p.price}</div>
+            </button>`).join('');
+    }
+
+    async function buyItem(id) {
+        if (id === 'noads' && isNoAds()) return;
+        let ok = false;
+        try {
+            if (window.FS_BILLING && typeof window.FS_BILLING.purchase === 'function') ok = await window.FS_BILLING.purchase(id);
+            else if (SHOP_TEST_MODE) ok = true;
+            else { alert('Satın alma şu anda kullanılamıyor.'); return; }
+        } catch (e) { alert('Satın alma şu anda kullanılamıyor.'); return; }
+        if (ok) grantPurchase(id);
+    }
+    window.buyItem = buyItem;
+
+    function grantPurchase(id) {
+        if (id === 'noads') setStoredData('fs_noads', 'true');
+        else {
+            const p = SHOP_PACKS.find(x => x.id === id); if (!p) return;
+            jetons += p.coins; setStoredData('fs_jetons', jetons);
+            headerTokensText.textContent = jetons; updateBoxLabels();
+        }
+        renderShop(); triggerVibration(60); sounds.playFanfare();
+        alert('Satın alma başarılı!');
+    }
+
+    $('openShopBtn').addEventListener('click', e => { e.stopPropagation(); if (anyCardOpen()) return; sounds.init(); renderShop(); shopModal.classList.remove('hidden'); });
+    $('shopCloseBtn').addEventListener('click', () => shopModal.classList.add('hidden'));
+
+    /* ================= DİLLER ================= */
+    const LANGS = ['tr', 'en', 'de', 'fr', 'ja', 'ko', 'zh'];
+    const LANG_NAMES = { tr: 'Türkçe', en: 'English', de: 'Deutsch', fr: 'Français', ja: '日本語', ko: '한국어', zh: '中文' };
+    let LANG = getStoredData('fs_lang', '');
+    if (!LANG) {   // cihaz dili desteklenmiyorsa İngilizce
+        const nav = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').slice(0, 2).toLowerCase();
+        LANG = LANGS.includes(nav) ? nav : 'en';
+        setStoredData('fs_lang', LANG);
+    }
+    document.documentElement.lang = LANG;
+    const LI = LANGS.indexOf(LANG);
+
+    // [tr, en, de, fr, ja, ko, zh]  -- Kayıt yoksa metin Türkçe kalır
+    const I18N = [
+    ["KARAKTERLER","CHARACTERS","FIGUREN","PERSONNAGES","キャラ","캐릭터","角色"],
+    ["ARENALAR","ARENAS","ARENEN","ARÈNES","アリーナ","경기장","球场"],
+    ["LİDERLİK","LEADERBOARD","BESTENLISTE","CLASSEMENT","ランキング","순위","排行榜"],
+    ["MAĞAZA","SHOP","SHOP","BOUTIQUE","ショップ","상점","商店"],
+    ["JETON PAKETLERİ","COIN PACKS","MÜNZPAKETE","PACKS DE JETONS","コインパック","코인 팩","金币包"],
+    ["Reklamları Kapat","Remove Ads","Werbung entfernen","Supprimer les pubs","広告を消す","광고 제거","去除广告"],
+    ["Reklamlar kalıcı olarak kapatılır","Removes ads permanently","Entfernt Werbung dauerhaft","Supprime les pubs définitivement","広告を永久に非表示にします","광고를 영구적으로 제거합니다","永久去除广告"],
+    ["SATIN ALINDI","PURCHASED","GEKAUFT","ACHETÉ","購入済み","구매 완료","已购买"],
+    ["POPÜLER","POPULAR","BELIEBT","POPULAIRE","人気","인기","热门"],
+    ["EN İYİ DEĞER","BEST VALUE","BESTES ANGEBOT","MEILLEUR PRIX","お得","최고 가성비","超值"],
+    ["Satın alma şu anda kullanılamıyor.","Purchases are not available right now.","Käufe sind derzeit nicht verfügbar.","Les achats sont indisponibles pour le moment.","現在購入できません。","현재 구매할 수 없습니다.","目前无法购买。"],
+    ["Satın alma başarılı!","Purchase successful!","Kauf erfolgreich!","Achat réussi !","購入完了!","구매 완료!","购买成功!"],
+    ["OYNA","PLAY","SPIELEN","JOUER","プレイ","플레이","开始"],
+    ["TEKRAR OYNA","PLAY AGAIN","NOCHMAL","REJOUER","もう一度","다시 하기","再玩一次"],
+    ["ANA EKRAN","HOME","STARTSEITE","ACCUEIL","ホーム","홈","主页"],
+    ["Karakter Kupası","Character Trophies","Figuren-Trophäen","Trophées du perso","キャラのトロフィー","캐릭터 트로피","角色奖杯"],
+    ["KİLİTLİ:","LOCKED:","GESPERRT:","VERROUILLÉ :","ロック中:","잠김:","未解锁:"],
+    ["BU KARAKTER KİLİTLİ!","THIS CHARACTER IS LOCKED!","DIESE FIGUR IST GESPERRT!","CE PERSONNAGE EST VERROUILLÉ !","このキャラはロック中!","이 캐릭터는 잠겨 있습니다!","该角色未解锁!"],
+    [" — kupa kas veya kutudan çıkar!"," — earn trophies or find it in a box!"," — sammle Pokale oder finde sie in Kisten!"," — gagne des trophées ou trouve-le dans un coffre !"," — トロフィーを集めるか、ボックスから入手!"," — 트로피를 모으거나 상자에서 얻으세요!"," — 赚取奖杯或从宝箱获得!"],
+    ["DURAKLATILDI","PAUSED","PAUSIERT","EN PAUSE","一時停止","일시정지","已暂停"],
+    ["Şu anki skor:","Current score:","Aktueller Stand:","Score actuel :","現在のスコア:","현재 점수:","当前得分:"],
+    [" gol"," goals"," Tore"," buts"," ゴール"," 골"," 球"],
+    ["DEVAM ET","CONTINUE","WEITER","CONTINUER","続ける","계속","继续"],
+    ["DEVAM","NEXT","WEITER","SUIVANT","次へ","다음","下一个"],
+    ["YENİDEN BAŞLA","RESTART","NEUSTART","RECOMMENCER","やり直す","다시 시작","重新开始"],
+    ["OYUNDAN ÇIK","QUIT GAME","SPIEL VERLASSEN","QUITTER","ゲーム終了","게임 종료","退出游戏"],
+    ["Müzik Sesi","Music Volume","Musiklautstärke","Volume musique","音楽の音量","음악 볼륨","音乐音量"],
+    ["Müzik","Music","Musik","Musique","音楽","음악","音乐"],
+    ["Efekt Sesi (SFX)","Effects Volume (SFX)","Effektlautstärke (SFX)","Volume effets (SFX)","効果音の音量 (SFX)","효과음 볼륨 (SFX)","音效音量 (SFX)"],
+    ["Efekt","Effects","Effekte","Effets","効果音","효과음","音效"],
+    ["AÇIK","ON","AN","ACTIVÉ","オン","켜짐","开"],
+    ["KAPALI","OFF","AUS","DÉSACTIVÉ","オフ","꺼짐","关"],
+    ["Dokunma Titreşimi","Vibration","Vibration","Vibration","バイブレーション","진동","触感振动"],
+    ["Oyun Zorluğu","Difficulty","Schwierigkeit","Difficulté","難易度","난이도","难度"],
+    ["KOLAY","EASY","LEICHT","FACILE","簡単","쉬움","简单"],
+    ["NORMAL","NORMAL","NORMAL","NORMAL","普通","보통","普通"],
+    ["ZOR","HARD","SCHWER","DIFFICILE","難しい","어려움","困难"],
+    ["GELİŞMİŞ AYARLAR","SETTINGS","EINSTELLUNGEN","PARAMÈTRES","設定","설정","设置"],
+    ["Hile Aktifleşti","Cheat activated","Cheat aktiviert","Triche activée","チート有効","치트 활성화","作弊已启用"],
+    ["Normal Aktifleşti","Normal activated","Normal aktiviert","Normal activé","通常モード有効","일반 모드 활성화","普通模式已启用"],
+    ["Kod Adı:","Code name:","Codename:","Nom de code :","コード名:","코드명:","代号:"],
+    ["HİLE","CHEAT","CHEAT","TRICHE","チート","치트","作弊"],
+    ["Tüm Oyun Verilerini Sıfırla","Reset All Game Data","Alle Spieldaten zurücksetzen","Réinitialiser toutes les données","全データをリセット","모든 게임 데이터 초기화","重置所有游戏数据"],
+    ["Tüm kupalar, jetonlar ve ayarlar sıfırlanacak. Emin misin?","All trophies, coins and settings will be reset. Are you sure?","Alle Pokale, Münzen und Einstellungen werden zurückgesetzt. Bist du sicher?","Tous les trophées, jetons et réglages seront réinitialisés. Es-tu sûr ?","すべてのトロフィー、コイン、設定がリセットされます。よろしいですか?","모든 트로피, 코인, 설정이 초기화됩니다. 계속할까요?","所有奖杯、金币和设置都将被重置。确定吗?"],
+    ["PROFİL","PROFILE","PROFIL","PROFIL","プロフィール","프로필","个人资料"],
+    ["İsmini ve takım logosunu belirle:","Choose your name and team logo:","Wähle deinen Namen und dein Teamlogo:","Choisis ton nom et le logo de ton équipe :","名前とチームロゴを選んでください:","이름과 팀 로고를 선택하세요:","设置你的名字和队徽:"],
+    ["Oyuncu Adın...","Your name...","Dein Name...","Ton nom...","プレイヤー名...","플레이어 이름...","你的名字..."],
+    ["OYUNCU","PLAYER","SPIELER","JOUEUR","プレイヤー","플레이어","玩家"],
+    ["TAKIM KAPAK FOTOĞRAFI:","TEAM COVER PHOTO:","TEAM-COVERBILD:","PHOTO D’ÉQUIPE :","チームカバー画像:","팀 커버 사진:","队伍封面:"],
+    ["(kilitliler kutudan çıkar)","(locked ones come from boxes)","(Gesperrte gibt es in Kisten)","(les verrouillés sortent des coffres)","(ロック中はボックスから入手)","(잠긴 항목은 상자에서 획득)","(未解锁的可从宝箱获得)"],
+    ["KAYDET","SAVE","SPEICHERN","ENREGISTRER","保存","저장","保存"],
+    ["KONTROL EDİLİYOR…","CHECKING…","PRÜFE…","VÉRIFICATION…","確認中…","확인 중…","检查中…"],
+    ["Bu isim kullanılamaz.","This name is not allowed.","Dieser Name ist nicht erlaubt.","Ce nom n’est pas autorisé.","この名前は使えません。","사용할 수 없는 이름입니다.","该名称不可用。"],
+    ["Bu isim başkası tarafından kullanılıyor. Başka bir isim dene.","This name is taken. Try another one.","Dieser Name ist vergeben. Versuch einen anderen.","Ce nom est déjà pris. Essaie-en un autre.","この名前は使用されています。別の名前を試してください。","이미 사용 중인 이름입니다. 다른 이름을 입력하세요.","该名称已被占用,请换一个。"],
+    ["KÜÇÜK KUTU","SMALL BOX","KLEINE KISTE","PETIT COFFRE","小ボックス","작은 상자","小宝箱"],
+    ["BÜYÜK KUTU","BIG BOX","GROSSE KISTE","GRAND COFFRE","大ボックス","큰 상자","大宝箱"],
+    ["DÜŞME ORANLARI","DROP RATES","DROPRATEN","TAUX DE DROP","ドロップ率","드롭 확률","掉落概率"],
+    ["ANLADIM","GOT IT","VERSTANDEN","COMPRIS","了解","확인","知道了"],
+    ["1) Önce jeton (toplam %20)","1) Coins first (total 20%)","1) Zuerst Münzen (gesamt 20 %)","1) D’abord des jetons (total 20 %)","1) まずコイン(合計20%)","1) 먼저 코인 (합계 20%)","1) 先抽金币(合计20%)"],
+    ["2) Sonra özel ödül","2) Then a special reward","2) Danach eine Spezialprämie","2) Puis une récompense spéciale","2) 次に特別報酬","2) 이후 특별 보상","2) 再抽特别奖励"],
+    ["❌ Jeton çıkmaz","❌ No coins","❌ Keine Münzen","❌ Pas de jetons","❌ コインなし","❌ 코인 없음","❌ 无金币"],
+    ["Kapak Fotoğrafı","Cover Photo","Titelbild","Photo de couverture","カバー画像","커버 사진","封面"],
+    ["Kostüm","Skin","Skin","Skin","スキン","스킨","皮肤"],
+    ["Yeni Karakter","New Character","Neue Figur","Nouveau personnage","新キャラ","새 캐릭터","新角色"],
+    ["Bugün oynayarak kazandığın her ","Every ","Je ","Chaque ","今日獲得したトロフィー","오늘 획득한 트로피 ","今天每获得 "],
+    [" kupa = 1 ücretsiz kutu (günde en fazla "," trophies earned today = 1 free box (max "," heute gewonnene Pokale = 1 Gratis-Kiste (max. "," trophées gagnés aujourd’hui = 1 coffre gratuit (max ","ごとに無料ボックス1個(1日最大","개당 무료 상자 1개 (하루 최대 "," 奖杯 = 1 个免费宝箱(每天最多 "],
+    ["). Her gün sıfırdan başlar.",", per day). Resets daily.",", pro Tag). Setzt sich täglich zurück.",", par jour). Réinitialisé chaque jour.","回)。毎日リセットされます。","개). 매일 초기화됩니다.","个)。每天重置。"],
+    ["Yarın yenilenecek","Resets tomorrow","Morgen wieder da","Revient demain","明日更新","내일 갱신","明天刷新"],
+    ["ÜCRETSİZ · kalan ","FREE · left ","GRATIS · übrig ","GRATUIT · reste ","無料 · 残り ","무료 · 남음 ","免费 · 剩余 "],
+    ["Ücretsiz:","Free:","Gratis:","Gratuit :","無料:","무료:","免费:"],
+    ["Yetersiz Jeton!","Not enough coins!","Nicht genug Münzen!","Pas assez de jetons !","コインが足りません!","코인이 부족합니다!","金币不足!"],
+    [" Jeton gerekiyor."," coins required."," Münzen nötig."," jetons requis."," コインが必要です。"," 코인이 필요합니다."," 金币。"],
+    ["Bugünkü ücretsiz hakkın doldu, yarın tekrar gel.","Today’s free boxes are used up, come back tomorrow.","Die Gratis-Kisten für heute sind aufgebraucht, komm morgen wieder.","Tes coffres gratuits du jour sont épuisés, reviens demain.","本日の無料枠は終了しました。また明日!","오늘의 무료 상자를 모두 사용했습니다. 내일 다시 오세요.","今天的免费宝箱已用完,明天再来吧。"],
+    ["Ücretsiz kutu için bugün ","For a free box, earn ","Für eine Gratis-Kiste fehlen heute noch ","Pour un coffre gratuit, gagne encore ","無料ボックスまであと","무료 상자까지 오늘 ","免费宝箱还需今天再获得 "],
+    [" kupa daha kazanmalısın."," more trophies today."," Pokale."," trophées aujourd’hui."," トロフィー獲得が必要です。"," 트로피가 더 필요합니다."," 个奖杯。"],
+    ["EFSANEVİ ÇEKİLİŞ!","LEGENDARY DRAW!","LEGENDÄRER ZUG!","TIRAGE LÉGENDAIRE !","伝説のドロー!","전설의 뽑기!","传奇抽取!"],
+    ["YENİ KARAKTER!","NEW CHARACTER!","NEUE FIGUR!","NOUVEAU PERSONNAGE !","新キャラ!","새 캐릭터!","新角色!"],
+    ["KOSTÜM AÇILDI!","SKIN UNLOCKED!","SKIN FREIGESCHALTET!","SKIN DÉBLOQUÉ !","スキン解放!","스킨 해금!","皮肤已解锁!"],
+    ["YENİ KOSTÜM","NEW SKIN","NEUER SKIN","NOUVEAU SKIN","新スキン","새 스킨","新皮肤"],
+    ["KAPAK AÇILDI!","COVER UNLOCKED!","TITELBILD FREIGESCHALTET!","COUVERTURE DÉBLOQUÉE !","カバー解放!","커버 해금!","封面已解锁!"],
+    ["YENİ KAPAK FOTOĞRAFI!","NEW COVER PHOTO!","NEUES TITELBILD!","NOUVELLE PHOTO DE COUVERTURE !","新しいカバー画像!","새 커버 사진!","新封面!"],
+    ["Önce karakterin kendisini açmalısın!","Unlock the character first!","Schalte zuerst die Figur frei!","Débloque d’abord le personnage !","まずキャラを解放してください!","먼저 캐릭터를 해금하세요!","请先解锁该角色!"],
+    ["Bu kapak fotoğrafı kilitli! Kutulardan çıkarabilirsin.","This cover photo is locked! Find it in boxes.","Dieses Titelbild ist gesperrt! Finde es in Kisten.","Cette couverture est verrouillée ! Trouve-la dans les coffres.","このカバー画像はロック中!ボックスから入手できます。","이 커버 사진은 잠겨 있습니다! 상자에서 얻을 수 있어요.","该封面未解锁!可从宝箱获得。"],
+    ["Bu arena kilitli! Toplam ","This arena is locked! You need ","Diese Arena ist gesperrt! Du brauchst insgesamt ","Cette arène est verrouillée ! Il faut ","このアリーナはロック中!合計 ","이 경기장은 잠겨 있습니다! 총 ","该球场未解锁!需要累计 "],
+    [" kupa gerekiyor."," total trophies."," Pokale."," trophées au total."," トロフィーが必要です。"," 트로피가 필요합니다."," 个奖杯。"],
+    ["AÇMAK İÇİN DOKUN!","TAP TO OPEN!","ZUM ÖFFNEN TIPPEN!","APPUIE POUR OUVRIR !","タップして開ける!","눌러서 열기!","点击打开!"],
+    ["TEBRİKLER!","CONGRATULATIONS!","GLÜCKWUNSCH!","FÉLICITATIONS !","おめでとう!","축하합니다!","恭喜!"],
+    ["TAMAM","OK","OK","OK","OK","확인","好的"],
+    ["ONAYLA","CONFIRM","BESTÄTIGEN","CONFIRMER","確認","확인","确认"],
+    ["Sırala:","Sort:","Sortieren:","Trier :","並び替え:","정렬:","排序:"],
+    ["En Yüksek","Highest","Höchste","Plus haut","高い順","높은 순","最高"],
+    ["En Düşük","Lowest","Niedrigste","Plus bas","低い順","낮은 순","最低"],
+    ["Özel Karakter","Special Character","Spezialfigur","Personnage spécial","特別キャラ","스페셜 캐릭터","特别角色"],
+    ["Efsanevi Karakter","Legendary Character","Legendäre Figur","Personnage légendaire","伝説のキャラ","전설 캐릭터","传奇角色"],
+    ["SEÇİLDİ","SELECTED","GEWÄHLT","CHOISI","選択中","선택됨","已选择"],
+    ["SEÇ","SELECT","WÄHLEN","CHOISIR","選択","선택","选择"],
+    ["İNCELE","VIEW","ANSEHEN","VOIR","見る","보기","查看"],
+    ["Kupa:","Trophies:","Pokale:","Trophées :","トロフィー:","트로피:","奖杯:"],
+    ["TOPLAM KUPA","TOTAL TROPHIES","POKALE GESAMT","TOTAL TROPHÉES","総トロフィー","총 트로피","总奖杯"],
+    ["EN YÜKSEK GOL","BEST SCORE","BESTER STAND","MEILLEUR SCORE","ハイスコア","최고 점수","最高得分"],
+    ["KUPA","TROPHIES","POKALE","TROPHÉES","トロフィー","트로피","奖杯"],
+    ["JETON","COINS","MÜNZEN","JETONS","コイン","코인","金币"],
+    ["Jeton","Coins","Münzen","Jetons","コイン","코인","金币"],
+    ["KIRMIZI KART!","RED CARD!","ROTE KARTE!","CARTON ROUGE !","レッドカード!","레드카드!","红牌!"],
+    ["Defansa Takıldın","You hit the defense","Du bist in der Abwehr hängengeblieben","Tu as buté sur la défense","ディフェンスに阻まれた","수비에 걸렸어요","被后卫拦下了"],
+    ["Kazanılan Karakter Kupası:","Character trophies earned:","Erhaltene Figuren-Trophäen:","Trophées gagnés :","獲得キャラトロフィー:","획득한 캐릭터 트로피:","获得角色奖杯:"],
+    ["Kazanılan Jeton:","Coins earned:","Erhaltene Münzen:","Jetons gagnés :","獲得コイン:","획득한 코인:","获得金币:"],
+    ["YENİ REKOR!","NEW RECORD!","NEUER REKORD!","NOUVEAU RECORD !","新記録!","신기록!","新纪录!"],
+    ["Eski rekor ","Old record ","Alter Rekord ","Ancien record ","旧記録 ","이전 기록 ","旧纪录 "],
+    ["Yeni rekor ","New record ","Neuer Rekord ","Nouveau record ","新記録 ","새 기록 ","新纪录 "],
+    ["GOL:","GOALS:","TORE:","BUTS :","ゴール:","골:","进球:"],
+    ["ARENA:","ARENA:","ARENA:","ARÈNE :","アリーナ:","경기장:","球场:"],
+    ["Yükleniyor…","Loading…","Lädt…","Chargement…","読み込み中…","불러오는 중…","加载中…"],
+    ["Henüz kimse yok. İlk sen ol!","Nobody here yet. Be the first!","Noch niemand da. Sei der Erste!","Personne pour l’instant. Sois le premier !","まだ誰もいません。一番乗りになろう!","아직 아무도 없어요. 첫 번째가 되어 보세요!","还没有人,快来当第一!"],
+    ["Sıran için önce profil oluştur.","Create a profile to get ranked.","Erstelle zuerst ein Profil für deinen Rang.","Crée d’abord un profil pour être classé.","ランク入りにはプロフィールを作成してください。","순위를 보려면 먼저 프로필을 만드세요.","请先创建个人资料以参与排名。"],
+    ["Oyna ve skorunla listeye gir!","Play and get on the list!","Spiele und komm in die Liste!","Joue et entre dans le classement !","プレイしてランキングに入ろう!","플레이하고 순위에 올라보세요!","开始游戏,冲上排行榜!"],
+    ["Senin sıran: ","Your rank: ","Dein Rang: ","Ton rang : ","あなたの順位: ","내 순위: ","你的排名: "],
+    ["Senin skorun: ","Your score: ","Dein Ergebnis: ","Ton score : ","あなたのスコア: ","내 점수: ","你的得分: "],
+    ["Henüz birinci yok","No leader yet","Noch kein Erster","Pas encore de premier","まだ1位なし","아직 1위 없음","暂无第一名"],
+    ["Senin birinciliklerin: ","Your #1 spots: ","Deine Erstplatzierungen: ","Tes premières places : ","あなたの1位: ","내 1위 기록: ","你的第一名: "],
+    ["Henüz hiçbir karakterde birinci değilsin.","You are not #1 with any character yet.","Du bist mit keiner Figur Erster.","Tu n’es premier avec aucun personnage.","まだどのキャラでも1位ではありません。","아직 어떤 캐릭터로도 1위가 아닙니다.","你还没有任何角色排名第一。"],
+    ["Tabloya bağlanılamadı","Could not load the leaderboard","Bestenliste konnte nicht geladen werden","Impossible de charger le classement","ランキングを読み込めません","순위를 불러올 수 없습니다","无法加载排行榜"],
+    ["TEKRAR DENE","TRY AGAIN","ERNEUT VERSUCHEN","RÉESSAYER","再試行","다시 시도","重试"],
+    ["GECE STADYUMU","NIGHT STADIUM","NACHTSTADION","STADE DE NUIT","ナイトスタジアム","야간 경기장","夜间球场"],
+    ["GÜN BATIMI","SUNSET","SONNENUNTERGANG","COUCHER DE SOLEIL","夕焼け","일몰","日落"],
+    ["BUZ ARENA","ICE ARENA","EISARENA","ARÈNE DE GLACE","アイスアリーナ","얼음 경기장","冰雪球场"],
+    ["NEON ŞEHİR","NEON CITY","NEONSTADT","VILLE NÉON","ネオンシティ","네온 도시","霓虹之城"],
+    ["LAV ARENA","LAVA ARENA","LAVA-ARENA","ARÈNE DE LAVE","溶岩アリーナ","용암 경기장","熔岩球场"],
+    ["DİKENLİ VADİ","THORN VALLEY","DORNENTAL","VALLÉE ÉPINEUSE","とげの谷","가시 계곡","荆棘谷"],
+    ["TESTERE FABRİKASI","SAW FACTORY","SÄGEFABRIK","USINE DE SCIES","ノコギリ工場","톱날 공장","电锯工厂"],
+    ["GÜL BAHÇESİ","ROSE GARDEN","ROSENGARTEN","JARDIN DE ROSES","バラ園","장미 정원","玫瑰花园"],
+    ["Klasik borular (karakter renginde)","Classic pipes (in character colors)","Klassische Rohre (in Figurenfarben)","Tuyaux classiques (couleurs du perso)","クラシックなパイプ(キャラの色)","클래식 파이프 (캐릭터 색상)","经典管道(角色配色)"],
+    ["Tuğla borular","Brick pipes","Ziegelrohre","Tuyaux en briques","レンガのパイプ","벽돌 파이프","砖砌管道"],
+    ["Buz sarkıtlı borular","Pipes with icicles","Rohre mit Eiszapfen","Tuyaux avec stalactites de glace","つららのパイプ","고드름 파이프","带冰锥的管道"],
+    ["Parlayan neon borular","Glowing neon pipes","Leuchtende Neonrohre","Tuyaux néon lumineux","光るネオンパイプ","빛나는 네온 파이프","发光的霓虹管道"],
+    ["Çatlaklarından lav akan borular","Pipes oozing lava from cracks","Rohre mit Lava in den Rissen","Tuyaux avec de la lave dans les fissures","ひび割れから溶岩が流れるパイプ","갈라진 틈에서 용암이 흐르는 파이프","裂缝流淌熔岩的管道"],
+    ["Dikenli borular (uçlar çarpar)","Thorny pipes (tips are deadly)","Dornige Rohre (Spitzen treffen)","Tuyaux épineux (les pointes touchent)","とげのパイプ(先端も当たる)","가시 파이프 (끝도 충돌)","带刺管道(尖端会碰撞)"],
+    ["Dönen testereli borular (çarpar)","Pipes with spinning saws (deadly)","Rohre mit rotierenden Sägen (treffen)","Tuyaux à scies rotatives (touchent)","回転ノコギリのパイプ(当たる)","회전 톱날 파이프 (충돌)","带旋转电锯的管道(会碰撞)"],
+    ["Dikenli sarmaşıklı taş sütunlar","Stone pillars with thorny vines","Steinsäulen mit Dornenranken","Colonnes de pierre à lianes épineuses","とげのつたが絡む石柱","가시 덩굴이 감긴 돌기둥","缠绕荆棘藤蔓的石柱"]
+    ];
+
+    const MAP = [];
+    if (LI > 0) I18N.forEach(r => { if (r[LI]) MAP.push([r[0], r[LI]]); });
+    MAP.sort((a, b) => b[0].length - a[0].length);   // uzun ifadeler önce
+    function tx(s) {
+        if (LI < 1 || !s) return s;
+        let out = String(s);
+        for (const [a, b] of MAP) if (out.includes(a)) out = out.split(a).join(b);
+        return out;
+    }
+    window.tx = tx;
+
+    // Ayarlar kartına dil seçici ekle
+    (function () {
+        const row = resetDataBtn.parentElement;
+        const box = document.createElement('div');
+        box.className = 'bg-slate-900/90 p-2.5 rounded-xl border border-slate-800';
+        box.innerHTML = `<span class="text-xs font-bold text-slate-200 block mb-1.5">🌐 Language / Dil</span>
+            <select id="langSelect" class="w-full bg-slate-800 border border-slate-600 rounded-lg text-xs text-white py-1.5 px-2">
+            ${LANGS.map(l => `<option value="${l}" ${l === LANG ? 'selected' : ''}>${LANG_NAMES[l]}</option>`).join('')}</select>`;
+        row.parentElement.insertBefore(box, row);
+        $('langSelect').addEventListener('change', e => { setStoredData('fs_lang', e.target.value); location.reload(); });
+    })();
+
+    if (LI > 0) {
+        // Ekrandaki tüm metinleri çevirir; sonradan eklenen/değişen metinleri de yakalar
+        const trNode = n => {
+            if (n.nodeType === 3) {
+                const v = n.nodeValue; if (v.length < 2) return;
+                const t = tx(v); if (t !== v) n.nodeValue = t;
+            } else if (n.nodeType === 1) {
+                if (n.tagName === 'SCRIPT' || n.tagName === 'STYLE') return;
+                ['placeholder', 'title'].forEach(a => { if (n.hasAttribute(a)) { const v = n.getAttribute(a), t = tx(v); if (t !== v) n.setAttribute(a, t); } });
+                n.childNodes.forEach(trNode);
+            }
+        };
+        trNode(document.body);
+        new MutationObserver(ms => ms.forEach(m => {
+            if (m.type === 'characterData') trNode(m.target); else m.addedNodes.forEach(trNode);
+        })).observe(document.body, { childList: true, subtree: true, characterData: true });
+        const _alert = window.alert.bind(window), _confirm = window.confirm.bind(window);
+        window.alert = m => _alert(tx(String(m)));
+        window.confirm = m => _confirm(tx(String(m)));
+    }
+</script>
+<style>
+    /* KARAKTERLER ikonunu azıcık aşağı indir (-6px idi; daha fazla istersen 0px, 2px yap) */
+    #openStarsBtn .tile-img { top: -2px; }
+
+    /* Brawl Stars tarzı rütbe + kupa barı */
+    .rank-pill { display: flex; align-items: center; margin-bottom: .5rem; }
+    #rankBadge { position: relative; z-index: 2; display: flex; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+    .rank-bar {
+        display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 14px 0 20px; margin-left: -16px;
+        border-radius: 9px; background: linear-gradient(180deg, #4b3a7e, #2a2050); border: 2px solid #6d5aa8;
+        box-shadow: inset 0 -3px 0 rgba(0,0,0,.28), 0 3px 8px rgba(0,0,0,.55);
+    }
+</style>
+<script>
+    (function () {
+        /* 1) Daire kenarındaki skin değiştirme okları kalktı (skin geçişi alttaki noktalardan devam eder) */
+        prevFormBtn.remove(); nextFormBtn.remove();
+
+        /* 2) RÜTBE SİSTEMİ: 0→1, 20→2, 50→3, 100→4, 200→5, sonra her +100'de +1 */
+        function rankOf(t) {
+            if (t < 20) return 1; if (t < 50) return 2; if (t < 100) return 3; if (t < 200) return 4;
+            return 5 + Math.floor((t - 200) / 100);
+        }
+        const RANK_COLS = [['#94a3b8', '#475569'], ['#38bdf8', '#0369a1'], ['#c084fc', '#6b21a8'], ['#f472b6', '#be185d'], ['#fb923c', '#c2410c'], ['#facc15', '#a16207']]; // her 5 rütbede renk değişir
+        function rankSvg(r, w) {
+            const c = RANK_COLS[Math.min(RANK_COLS.length - 1, Math.floor((r - 1) / 5))], h = Math.round(w * 1.15), fs = r > 99 ? 20 : 26;
+            return `<svg width="${w}" height="${h}" viewBox="0 0 40 46"><polygon points="20,1 39,12 39,34 20,45 1,34 1,12" fill="${c[1]}" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/><polygon points="20,6 34,14 34,32 20,40 6,32 6,14" fill="${c[0]}"/><text x="20" y="31" text-anchor="middle" font-family="Teko,sans-serif" font-size="${fs}" font-weight="700" fill="#fff" stroke="#0b1b3a" stroke-width="3" paint-order="stroke">${r}</text></svg>`;
+        }
+
+        /* Lobideki kupa barı: [rütbe rozeti] [🏆 kupa sayısı] */
+        const pill = characterTrophies.parentElement;
+        pill.className = 'rank-pill'; pill.removeAttribute('style');
+        const badge = document.createElement('div'); badge.id = 'rankBadge';
+        const bar = document.createElement('div'); bar.className = 'rank-bar';
+        const ico = document.createElement('span'); ico.textContent = '🏆'; ico.style.cssText = 'font-size:16px;line-height:1';
+        characterTrophies.className = 'font-salah';
+        characterTrophies.style.cssText = 'font-size:23px;line-height:1;color:#fcd34d;text-shadow:0 2px 0 #7c2d12,0 0 6px rgba(0,0,0,.6)';
+        bar.append(ico, characterTrophies);
+        pill.replaceChildren(badge, bar);
+
+        function updateRankBadge() { badge.innerHTML = rankSvg(rankOf(getStarTrophies(activeStarCache.id)), 34); }
+        const _rkLoad = loadSelectedStar;
+        loadSelectedStar = function () { _rkLoad(); updateRankBadge(); };
+        updateRankBadge();
+
+        /* 3) KARAKTERLER listesi: TÜMÜ / FUTBOLCULAR / ÖZEL KARAKTERLER + rütbe rozeti */
+        const SPECIAL = new Set(['pusu', 'kartal', 'jackson', 'tantunispor', 'ibo', 'yakup', 'umidi', 'yeah', 'caylar', 'murat']);
+        let flt = 'all';
+        const F_ON = 'text-[10px] font-bold py-1.5 border border-amber-500 rounded bg-amber-500 text-slate-950 whitespace-nowrap';
+        const F_OFF = 'text-[10px] font-bold py-1.5 border border-slate-700 rounded bg-slate-800 text-slate-400 whitespace-nowrap';
+        const fRow = document.createElement('div');
+        fRow.className = 'grid gap-1 mb-1.5'; fRow.style.gridTemplateColumns = '1fr 1.4fr 1.7fr';
+        const fBtns = {};
+        [['all', 'TÜMÜ'], ['foot', 'FUTBOLCULAR'], ['special', 'ÖZEL KARAKTERLER']].forEach(([k, t]) => {
+            const b = document.createElement('button'); b.textContent = t; b.onclick = () => { flt = k; renderStarsList(); };
+            fBtns[k] = b; fRow.appendChild(b);
+        });
+        starsList.parentElement.insertBefore(fRow, starsList);
+
+        renderStarsList = function () {
+            starsList.innerHTML = '';
+            totalTrophies = calculateTotalTrophies();
+            Object.keys(fBtns).forEach(k => fBtns[k].className = k === flt ? F_ON : F_OFF);
+            const inCat = STARS_DATA.filter(s => flt === 'all' || (flt === 'special') === SPECIAL.has(s.id));
+            const sortedStars = inCat.map(star => ({ ...star, trophies: getStarTrophies(star.id) }));
+            sortedStars.sort((a, b) => {
+                const ua = isStarUnlocked(a), ub = isStarUnlocked(b);
+                if (ua !== ub) return ua ? -1 : 1;
+                if (!ua) return a.requiredTrophies - b.requiredTrophies;
+                return sortHighestFirst ? b.trophies - a.trophies : a.trophies - b.trophies;
+            });
+            sortDirectionText.textContent = sortHighestFirst ? 'En Yüksek' : 'En Düşük';
+            starsCount.textContent = `${inCat.filter(x => isStarUnlocked(x)).length}/${inCat.length}`;
+
+            sortedStars.forEach(star => {
+                const isSelected = star.id === selectedStarId;
+                const unlocked = isStarUnlocked(star);
+                const maxF = maxForm(star);
+                const currentForm = Math.min(getStarForm(star.id), maxF);
+                const shownForm = (unlocked && isFormUnlocked(star, currentForm)) ? currentForm : 1;
+                const displayImg = formImg(star, shownForm);
+                const displayImgPos = formPos(star, shownForm);
+                const altImg = displayImg === star.img ? (star.imgFallback || star.img2 || '') : star.img;
+                const listName = (shownForm === 3 && star.name3) ? star.name3 : (SHORT_NAMES[star.id] || star.name);
+                const vBadge = shownForm > 1 && !(shownForm === 3 && star.name3) ? `<span class="text-xs text-amber-400 font-bold flex-shrink-0">V${shownForm}</span>` : '';
+
+                const card = document.createElement('div');
+                card.className = `p-2.5 rounded-xl border cursor-pointer transition ${isSelected ? 'bg-sky-900/40 border-amber-400' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'}`;
+                card.onclick = e => { if (!e.target.dataset.formBtn) selectStar(star.id); };
+
+                const trophyText = unlocked ? `${star.trophies}` : `${totalTrophies} / <span class="text-slate-400">${star.requiredTrophies}</span>`;
+
+                let formHtml = '';
+                if (unlocked && maxF > 1) {
+                    const ok = [], lock = [];
+                    for (let f = 2; f <= maxF; f++) (isFormUnlocked(star, f) ? ok : lock).push(f);
+                    if (ok.length) formHtml += `<div class="flex items-center gap-1">${[1, ...ok].map(f =>
+                        `<button data-form-btn="true" onclick="changeStarForm(event, '${star.id}', ${f})" class="text-[10px] font-bold px-2 py-0.5 rounded border ${shownForm === f ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-800 text-slate-400 border-slate-700'}">V${f}</button>`).join('')}</div>`;
+                    lock.forEach(f => {
+                        formHtml += `<button data-form-btn="true" onclick="selectStar('${star.id}'); setStarForm('${star.id}', ${f}); loadSelectedStar();" class="text-[10px] font-bold px-2 py-0.5 rounded border bg-slate-800 text-amber-300 border-amber-500/50 active:scale-95 transition whitespace-nowrap">🔒 V${f} (${star.trophies}/${FORM_REQ[f]} 🏆)</button>`;
+                    });
+                }
+
+                const pickBtn = isSelected ? `<span class="text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 px-3 py-1 rounded-lg">SEÇİLDİ</span>`
+                    : unlocked ? `<button onclick="selectStar('${star.id}')" class="text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white px-3 py-1 rounded-lg">SEÇ</button>`
+                    : `<button onclick="selectStar('${star.id}')" class="text-xs font-bold bg-amber-500 text-slate-950 px-3 py-1 rounded-lg border border-amber-300">🔒 İNCELE</button>`;
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full overflow-hidden border border-white/20 bg-slate-800 flex-shrink-0 relative">
+                            <img src="${displayImg}" onerror="this.onerror=null;this.src='${altImg}'" ${formZoom(star, shownForm) !== 1 ? `style="transform:scale(${formZoom(star, shownForm)})"` : ''} class="w-full h-full object-cover ${displayImgPos}">
+                        </div>
+                        <div class="text-left min-w-0 flex-1">
+                            <div class="flex items-center gap-1 min-w-0"><span class="font-salah ${listName.length > 14 ? 'text-base' : 'text-lg'} leading-tight text-white truncate">${listName}</span>${vBadge}</div>
+                            <div class="text-[10px] text-sky-400 font-bold truncate">${star.title}</div>
+                            ${formHtml ? `<div class="flex flex-wrap items-center gap-1 my-0.5">${formHtml}</div>` : ''}
+                            <div class="flex items-center gap-1 text-[11px] text-amber-300 font-bold">${unlocked ? rankSvg(rankOf(star.trophies), 20) : ''}<span>Kupa: ${trophyText} 🏆</span></div>
+                        </div>
+                        <div class="flex-shrink-0">${pickBtn}</div>
+                    </div>`;
+                starsList.appendChild(card);
+            });
+        };
+
+        /* Yeni butonların çevirileri (dil seçeneği kullanıyorsan) */
+        if (typeof LI !== 'undefined' && LI > 0) {
+            [['TÜMÜ', 'ALL', 'ALLE', 'TOUS', 'すべて', '전체', '全部'],
+             ['FUTBOLCULAR', 'FOOTBALLERS', 'FUSSBALLER', 'FOOTBALLEURS', 'サッカー選手', '축구 선수', '球员'],
+             ['ÖZEL KARAKTERLER', 'SPECIAL', 'SPEZIAL', 'SPÉCIAUX', '特別', '스페셜', '特别']
+            ].forEach(r => MAP.push([r[0], r[LI]]));
+            MAP.sort((a, b) => b[0].length - a[0].length);
+            fRow.querySelectorAll('button').forEach(b => b.textContent = tx(b.textContent));
+        }
+    })();
+</script>
+<style>
+    #friendsModal input { -webkit-user-select: text; user-select: text; }
+</style>
+<script>
+    (function () {
+        /* ---------- Çeviri kayıtları (önce eklenmeli) ---------- */
+        if (typeof LI !== 'undefined' && LI > 0) {
+            [['ARKADAŞLAR', 'FRIENDS', 'FREUNDE', 'AMIS', 'フレンド', '친구', '好友'],
+             ['ARKADAŞ EKLE', 'ADD FRIEND', 'FREUND HINZUFÜGEN', 'AJOUTER', '追加', '친구 추가', '加好友'],
+             ['İSTEKLER', 'REQUESTS', 'ANFRAGEN', 'DEMANDES', 'リクエスト', '요청', '请求'],
+             ['ARKADAŞLARIM', 'MY FRIENDS', 'MEINE FREUNDE', 'MES AMIS', 'フレンド一覧', '내 친구', '我的好友'],
+             ['REKOR', 'RECORD', 'REKORD', 'RECORD', '記録', '기록', '纪录']
+            ].forEach(r => MAP.push([r[0], r[LI]]));
+            MAP.sort((a, b) => b[0].length - a[0].length);
+        }
+
+        /* ================= 1) REKOR YILDIZI ================= */
+        const RS = document.createElement('canvas'); RS.width = RS.height = 128;
+        const GLW = document.createElement('canvas'); GLW.width = GLW.height = 128;
+        (function () {
+            const g = GLW.getContext('2d'), rg = g.createRadialGradient(64, 64, 4, 64, 64, 64);
+            rg.addColorStop(0, 'rgba(255,240,150,.95)'); rg.addColorStop(.45, 'rgba(253,224,71,.4)'); rg.addColorStop(1, 'rgba(253,224,71,0)');
+            g.fillStyle = rg; g.fillRect(0, 0, 128, 128);
+
+            const c = RS.getContext('2d'), cx = 64, cy = 67, R = 52, r = 25;
+            const path = (R2, r2) => {
+                c.beginPath();
+                for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? r2 : R2; c[i ? 'lineTo' : 'moveTo'](cx + Math.cos(a) * d, cy + Math.sin(a) * d); }
+                c.closePath();
+            };
+            c.lineJoin = 'round';
+            path(R, r); c.lineWidth = 11; c.strokeStyle = '#7c2d12'; c.stroke();
+            const gr = c.createLinearGradient(0, cy - R, 0, cy + R);
+            gr.addColorStop(0, '#fff6a8'); gr.addColorStop(.45, '#fcd34d'); gr.addColorStop(1, '#d97706');
+            path(R, r); c.fillStyle = gr; c.fill();
+            for (let i = 0; i < 5; i++) {
+                const a = -Math.PI / 2 + i * 2 * Math.PI / 5, b = a + Math.PI / 5;
+                c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); c.lineTo(cx + Math.cos(b) * r, cy + Math.sin(b) * r); c.closePath();
+                c.fillStyle = 'rgba(180,83,9,.32)'; c.fill();
+            }
+            c.save(); path(R, r); c.clip(); path(R, r); c.lineWidth = 4; c.strokeStyle = 'rgba(255,251,200,.9)'; c.stroke(); c.restore();
+            c.fillStyle = 'rgba(255,255,255,.6)'; c.beginPath(); c.ellipse(cx - 12, cy - 24, 7, 3.5, -.9, 0, 7); c.fill();
+        })();
+
+        const LBL = document.createElement('canvas'); let lblKey = '';
+        function buildLabel() {
+            const txt = `${tx('REKOR')} ${highScore}`, k = txt + document.fonts.status;
+            if (k === lblKey) return; lblKey = k;
+            LBL.width = 200; LBL.height = 52;
+            const c = LBL.getContext('2d');
+            c.font = '700 36px "Teko",sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineJoin = 'round';
+            c.lineWidth = 7; c.strokeStyle = '#451a03'; c.strokeText(txt, 100, 28); c.fillStyle = '#fde047'; c.fillText(txt, 100, 28);
+        }
+        function sparkle(x, y, s) {
+            ctx.beginPath(); ctx.moveTo(x, y - s); ctx.quadraticCurveTo(x, y, x + s, y); ctx.quadraticCurveTo(x, y, x, y + s);
+            ctx.quadraticCurveTo(x, y, x - s, y); ctx.quadraticCurveTo(x, y, x, y - s); ctx.fill();
+        }
+        drawRecordStar = function (pipe) {
+            buildLabel();
+            const cx = pipe.x + pipe.width / 2, cy = (pipe.topHeight + pipe.bottomY) / 2, t = performance.now() / 1000;
+            const S = 50 + Math.sin(t * 4) * 2, bob = Math.sin(t * 3) * 3;
+            ctx.save(); ctx.translate(cx, cy + bob);
+            ctx.globalAlpha = .6 + .25 * Math.sin(t * 4); const gs = S * 2.4; ctx.drawImage(GLW, -gs / 2, -gs / 2, gs, gs);
+            ctx.save(); ctx.rotate(t * .9); ctx.globalAlpha = .26; ctx.fillStyle = '#fde047';
+            for (let i = 0; i < 8; i++) { ctx.rotate(Math.PI / 4); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-5, -S * .95); ctx.lineTo(5, -S * .95); ctx.closePath(); ctx.fill(); }
+            ctx.restore();
+            ctx.globalAlpha = 1;
+            ctx.save(); ctx.rotate(Math.sin(t * 2) * .1); ctx.drawImage(RS, -S / 2, -S / 2, S, S); ctx.restore();
+            ctx.fillStyle = '#fff';
+            for (let i = 0; i < 3; i++) { const a = t * 1.6 + i * 2.094, rr = S * .7; sparkle(Math.cos(a) * rr, Math.sin(a) * rr, 2.5 + 1.8 * Math.abs(Math.sin(t * 5 + i))); }
+            ctx.drawImage(LBL, -50, S * .5 + 1, 100, 26);
+            ctx.restore();
+        };
+
+        /* ================= 2) Oyun içi karakter/şarkı adı kutusu kalktı ================= */
+        const _tc = triggerCelebration;
+        triggerCelebration = function () { _tc(); salahCelebration.classList.add('hidden'); };
+
+        /* ================= 3) Liderlik ID'si 5 karakter ================= */
+        const _rl = renderLb;
+        renderLb = function (d) {
+            _rl(d);
+            if (d && d.rows) lbList.querySelectorAll('span.text-slate-500').forEach((s, i) => { if (d.rows[i]) s.textContent = '#' + d.rows[i].id.slice(0, 5).toUpperCase(); });
+        };
+
+        /* ================= 4) ARKADAŞLAR (sadece ekleme, istekler, liste) ================= */
+        const FR = { tab: 'friends', list: [], me: '', found: null };
+        const pid = u => String(u || '').slice(0, 5).toUpperCase();
+        const av = s => AVATARS.some(a => a.src === s) ? s : 'ts.jpg';
+        const sv = s => ({ stringValue: String(s) });
+        const F = id => document.getElementById(id);
+
+        const svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 56'>" +
+            "<circle cx='42' cy='20' r='8' fill='#fbbf24' stroke='#fff' stroke-width='2'/><path d='M28 46c0-9 6-14 14-14s14 5 14 14z' fill='#f59e0b' stroke='#fff' stroke-width='2' stroke-linejoin='round'/>" +
+            "<circle cx='22' cy='18' r='9' fill='#38bdf8' stroke='#fff' stroke-width='2'/><path d='M6 46c0-10 7-16 16-16s16 6 16 16z' fill='#0ea5e9' stroke='#fff' stroke-width='2' stroke-linejoin='round'/>" +
+            "<circle cx='52' cy='12' r='9' fill='#22c55e' stroke='#fff' stroke-width='2'/><path d='M52 7v10M47 12h10' stroke='#fff' stroke-width='3' stroke-linecap='round'/></svg>";
+        const tile = document.createElement('button');
+        tile.id = 'openFriendsBtn'; tile.className = 'menu-tile pointer-events-auto';
+        tile.innerHTML = `<span class="tile-base"></span><img class="tile-img" src="assets/menu_arkadaslar.png" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,${encodeURIComponent(svg)}'"><span class="tile-label">ARKADAŞLAR</span>` +
+            `<span id="frDot" class="hidden" style="position:absolute;right:6px;top:-2px;width:14px;height:14px;border-radius:50%;background:#ef4444;border:2px solid #fff;z-index:3"></span>`;
+        $('openShopBtn').replaceWith(tile);
+
+        const modal = document.createElement('div');
+        modal.id = 'friendsModal'; modal.className = 'hidden absolute inset-0 bg-slate-950/90 z-50 flex flex-col items-center justify-center p-4';
+        modal.innerHTML = `<div class="card-bg rounded-2xl shadow-2xl max-w-xs w-full border-amber-400 p-4 flex flex-col max-h-[94%]">
+            <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
+                <h2 id="frTitle" class="text-2xl font-salah text-amber-400 m-0 truncate">ARKADAŞLAR</h2>
+                <button id="frClose" class="text-slate-400 hover:text-white font-bold text-lg px-2">✕</button>
+            </div>
+            <div id="frTabs" class="grid gap-1 mb-2" style="grid-template-columns:1.3fr 1fr 1.4fr"></div>
+            <div id="frBody" class="overflow-y-auto custom-scroll pr-1 space-y-1.5 min-h-[220px] max-h-[330px]"></div>
+            <div id="frMsg" class="text-[11px] font-bold text-center min-h-[16px] mt-1"></div>
+        </div>`;
+        uiOverlay.appendChild(modal);
+        CARD_EL.push(modal); cardObs.observe(modal, { attributes: true, attributeFilter: ['class'] });
+
+        /* --- Sunucu işlemleri (Firestore REST) --- */
+        async function fsReq(path, method, body) {
+            const a = await fbSignIn();
+            return fx(`${FS_BASE}${path}${path.includes('?') ? '&' : '?'}key=${FB.apiKey}`, { method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + a.idToken }, body: body ? JSON.stringify(body) : undefined });
+        }
+        async function runQ(parent, sq) {
+            const r = await fsReq(parent + ':runQuery', 'POST', { structuredQuery: sq });
+            if (!r.ok) throw new Error(await errText(r));
+            return (await r.json()).filter(x => x.document).map(x => x.document);
+        }
+        const eq = (f, v) => ({ fieldFilter: { field: { fieldPath: f }, op: 'EQUAL', value: sv(v) } });
+        async function loadReqs() {
+            const me = (await fbSignIn()).uid;
+            const q = f => runQ('', { from: [{ collectionId: 'requests' }], where: eq(f, me) });
+            const [a, b] = await Promise.all([q('from'), q('to')]);
+            const mk = d => { const f = d.fields || {}, g = k => (f[k] && f[k].stringValue) || ''; return { id: d.name.split('/').pop(), from: g('from'), to: g('to'), fromName: g('fromName'), fromAvatar: g('fromAvatar'), toName: g('toName'), toAvatar: g('toAvatar'), status: g('status') }; };
+            FR.me = me; FR.list = [...a, ...b].map(mk);
+        }
+        const incoming = () => FR.list.filter(r => r.to === FR.me && r.status === 'pending');
+        const sentReqs = () => FR.list.filter(r => r.from === FR.me && r.status === 'pending');
+        const friends = () => FR.list.filter(r => r.status === 'accepted').map(r => r.from === FR.me ? { uid: r.to, name: r.toName, avatar: r.toAvatar, req: r } : { uid: r.from, name: r.fromName, avatar: r.fromAvatar, req: r });
+
+        async function findByName(n) {
+            const r = await fx(`${FS_BASE}/names/${nameKey(n)}?key=${FB.apiKey}`);
+            if (r.status === 404) return null;
+            if (!r.ok) throw new Error(await errText(r));
+            const uid = (((await r.json()).fields || {}).uid || {}).stringValue; if (!uid) return null;
+            let name = n, avatar = 'ts.jpg';
+            try { const p = await fx(`${FS_BASE}/players/${uid}?key=${FB.apiKey}`); if (p.ok) { const f = (await p.json()).fields || {}; name = (f.name && f.name.stringValue) || n; avatar = (f.avatar && f.avatar.stringValue) || avatar; } } catch (e) {}
+            return { uid, name, avatar };
+        }
+        async function patchAccept(id) {
+            const r = await fsReq(`/requests/${id}?updateMask.fieldPaths=status&currentDocument.exists=true`, 'PATCH', { fields: { status: sv('accepted') } });
+            if (!r.ok) throw new Error(await errText(r));
+        }
+        async function delReq(id) { const r = await fsReq(`/requests/${id}`, 'DELETE'); if (!r.ok && r.status !== 404) throw new Error(await errText(r)); }
+        async function sendReq(t) {
+            if (!t) return '';
+            await loadReqs();
+            if (t.uid === FR.me) return 'Kendini ekleyemezsin.';
+            const ex = FR.list.find(r => (r.from === FR.me && r.to === t.uid) || (r.from === t.uid && r.to === FR.me));
+            if (ex) {
+                if (ex.status === 'accepted') return 'Zaten arkadaşsınız.';
+                if (ex.to === FR.me) { await patchAccept(ex.id); return 'Bu kişi sana da istek atmıştı, arkadaş oldunuz!'; }
+                return 'İstek zaten gönderilmiş.';
+            }
+            const r = await fsReq(`/requests?documentId=${FR.me}_${t.uid}`, 'POST', { fields: {
+                from: sv(FR.me), to: sv(t.uid), fromName: sv(lbSafeName(username)), fromAvatar: sv(selectedAvatar),
+                toName: sv(t.name), toAvatar: sv(t.avatar), status: sv('pending'), ts: { integerValue: String(Date.now()) } } });
+            if (!r.ok) throw new Error(await errText(r));
+            return 'İstek gönderildi!';
+        }
+
+        /* --- Arayüz --- */
+        const T_ON = 'text-[10px] font-bold py-1.5 border border-amber-500 rounded bg-amber-500 text-slate-950 whitespace-nowrap';
+        const T_OFF = 'text-[10px] font-bold py-1.5 border border-slate-700 rounded bg-slate-800 text-slate-400 whitespace-nowrap';
+        const INP = 'flex-1 min-w-0 bg-slate-900 border-2 border-sky-500 rounded-xl px-3 py-1.5 text-white text-sm font-bold focus:outline-none focus:border-amber-400';
+        const body = () => F('frBody');
+        const note = (t, ok) => { const m = F('frMsg'); m.textContent = t || ''; m.className = 'text-[11px] font-bold text-center min-h-[16px] mt-1 ' + (ok ? 'text-emerald-300' : 'text-red-400'); };
+        const why = e => /403|permission/i.test((e && e.message) || '') ? 'Sunucu izni yok: Firestore kuralları henüz eklenmemiş.' : friendlyErr(e);
+        const empty = t => `<div class="text-slate-500 text-[11px] py-3 text-center">${t}</div>`;
+        const btn = (act, id, t, cls) => `<button data-act="${act}" data-id="${esc(id)}" class="text-[11px] font-bold px-2 py-1 rounded-lg active:scale-95 ${cls}">${t}</button>`;
+        const row = (name, avatar, uid, right) => `<div class="flex items-center gap-2 p-1.5 rounded-lg border bg-slate-900/80 border-slate-800">
+            <img src="${av(avatar)}" class="w-8 h-8 rounded-md object-cover flex-shrink-0">
+            <div class="flex-1 min-w-0"><div class="truncate text-[13px] font-bold text-white">${esc(lbSafeName(name))}</div><div class="text-[9px] font-semibold text-slate-500">#${esc(pid(uid))}</div></div>
+            <div class="flex gap-1 flex-shrink-0">${right}</div></div>`;
+        function updateDot() { F('frDot').classList.toggle('hidden', !incoming().length); }
+        function drawTabs() {
+            const n = incoming().length;
+            F('frTabs').innerHTML = [['add', 'ARKADAŞ EKLE'], ['req', 'İSTEKLER'], ['friends', 'ARKADAŞLARIM']]
+                .map(([k, t]) => `<button data-tab="${k}" class="${k === FR.tab ? T_ON : T_OFF}">${t}${k === 'req' && n ? ` (${n})` : ''}</button>`).join('');
+        }
+        async function show(tab) {
+            FR.tab = tab; drawTabs(); note('');
+            if (!username) { body().innerHTML = empty('Önce profil oluştur.'); return; }
+            if (tab === 'add') { viewAdd(); return; }
+            body().innerHTML = empty('Yükleniyor…');
+            try { await loadReqs(); } catch (e) { if (FR.tab === tab) body().innerHTML = `<div class="text-center text-red-400 text-xs py-8 px-2">${esc(why(e))}</div>`; return; }
+            if (FR.tab !== tab) return;
+            drawTabs(); updateDot();
+            tab === 'req' ? viewReq() : viewFriends();
+        }
+        function viewAdd() {
+            body().innerHTML = `<div class="text-[11px] text-slate-300 text-left">Arkadaşının oyuncu adını yaz:</div>
+                <div class="flex gap-1.5"><input id="frName" maxlength="16" placeholder="Oyuncu adı..." class="${INP}"><button id="frFind" class="px-3 bg-sky-600 text-white font-bold text-xs rounded-xl active:scale-95">ARA</button></div>
+                <div id="frFound" class="pt-1"></div>
+                <div class="text-[10px] text-slate-500 pt-2 text-left">Senin adın: <b class="text-sky-300">${esc(lbSafeName(username))}</b> · ID #${esc(pid(getStoredData('fs_fb_uid', '')))}</div>`;
+            const go = async () => {
+                const v = F('frName').value.trim(), out = F('frFound'); if (!v) return;
+                out.innerHTML = empty('Aranıyor…');
+                try {
+                    const u = await findByName(v);
+                    if (!u) { out.innerHTML = empty('Böyle bir oyuncu bulunamadı.'); return; }
+                    FR.found = u; out.innerHTML = row(u.name, u.avatar, u.uid, btn('send', u.uid, 'İSTEK GÖNDER', 'bg-emerald-600 text-white'));
+                } catch (e) { out.innerHTML = `<div class="text-xs text-red-400">${esc(why(e))}</div>`; }
+            };
+            F('frFind').onclick = go; F('frName').onkeydown = e => { if (e.key === 'Enter') go(); };
+        }
+        function viewReq() {
+            const h = t => `<div class="font-salah text-lg text-sky-300 text-left leading-none pt-1">${t}</div>`, inc = incoming(), sent = sentReqs();
+            body().innerHTML = h('GELEN İSTEKLER') + (inc.length ? inc.map(r => row(r.fromName, r.fromAvatar, r.from, btn('accept', r.id, 'KABUL', 'bg-emerald-600 text-white') + btn('reject', r.id, 'RED', 'bg-red-900 text-red-200'))).join('') : empty('Gelen istek yok.'))
+                + h('GÖNDERİLEN İSTEKLER') + (sent.length ? sent.map(r => row(r.toName, r.toAvatar, r.to, btn('cancel', r.id, 'İPTAL', 'bg-slate-700 text-slate-200'))).join('') : empty('Gönderilen istek yok.'));
+        }
+        function viewFriends() {
+            const fl = friends();
+            body().innerHTML = fl.length ? fl.map(f => row(f.name, f.avatar, f.uid, btn('unfriend', f.req.id, '✕', 'bg-slate-700 text-slate-300'))).join('')
+                : empty('Henüz arkadaşın yok. "ARKADAŞ EKLE" sekmesinden oyuncu adıyla ara.');
+        }
+
+        /* --- Olaylar --- */
+        F('frTabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) show(b.dataset.tab); });
+        F('frBody').addEventListener('click', async e => {
+            const b = e.target.closest('[data-act]'); if (!b) return;
+            const act = b.dataset.act, id = b.dataset.id; b.disabled = true;
+            try {
+                if (act === 'send') note(await sendReq(FR.found), true);
+                else if (act === 'accept') { await patchAccept(id); await show('req'); note('Arkadaş oldunuz!', true); }
+                else if (act === 'reject' || act === 'cancel') { await delReq(id); await show('req'); }
+                else if (act === 'unfriend') { if (confirm('Arkadaşlıktan çıkarılsın mı?')) { await delReq(id); await show('friends'); } }
+            } catch (err) { note(why(err)); }
+            b.disabled = false;
+        });
+        F('frClose').addEventListener('click', () => { modal.classList.add('hidden'); updateDot(); });
+        tile.addEventListener('click', async e => {
+            e.stopPropagation(); if (anyCardOpen()) return;
+            sounds.init(); modal.classList.remove('hidden');
+            FR.tab = 'friends'; drawTabs(); body().innerHTML = empty('Yükleniyor…');
+            if (username) await syncLeaderboard().catch(() => {});
+            show(username ? 'friends' : 'add');
+        });
+        setTimeout(() => { if (username && getStoredData('fs_fb_refresh', '')) loadReqs().then(updateDot).catch(() => {}); }, 7000);
+    })();
+</script>
+<script>
+    /* ===== ANINDA REKOR: yıldız patlar, ses + yazı hemen gelir ===== */
+    (function () {
+        const REC_START = 0;   // rekor.mp3 başında sessizlik varsa buraya saniye yaz (örn. 0.15)
+
+        /* 1) Yıldız artık rekoru KIRACAK boruda durur (eski rekor + 1. boru) */
+        const _cp = createPipe;
+        createPipe = function () { _cp(); pipes[pipes.length - 1].idx -= 1; };
+
+        /* 2) Ses: önceden yüklenir, oyuna başlarken kilidi açılır, anında çalar */
+        const recAudio = new Audio('rekor.mp3');
+        recAudio.preload = 'auto'; recAudio.load();
+        let recUnlocked = false;
+        function unlockRec() {
+            if (recUnlocked) return; recUnlocked = true;
+            recAudio.muted = true;
+            const p = recAudio.play();
+            if (p && p.then) p.then(() => { recAudio.pause(); recAudio.currentTime = REC_START; recAudio.muted = false; })
+                              .catch(() => { recUnlocked = false; recAudio.muted = false; });
+        }
+        SoundEffects.prototype.playRecord = function () {
+            if (isSfxMuted || sfxVolume <= 0) return;
+            const fallback = () => {
+                this.init();
+                [659.25, 783.99, 987.77, 1318.51, 1567.98].forEach((f, i) => this.tone('triangle', f, f, 0.28, 0.35, i * 0.09));
+            };
+            try {
+                recAudio.pause(); recAudio.currentTime = REC_START; recAudio.muted = false; recAudio.volume = sfxVolume;
+                const p = recAudio.play();
+                if (p && p.catch) p.catch(fallback);
+            } catch (e) { fallback(); }
+        };
+
+        /* 3) Patlama efekti */
+        let recFx = [], recRing = null;
+        function explodeStar(x, y) {
+            const cols = ['#fde047', '#fbbf24', '#ffffff', '#fb923c', '#fff7ae'];
+            for (let i = 0; i < 36; i++) {
+                const a = Math.random() * Math.PI * 2, sp = 1.5 + Math.random() * 5.5;
+                recFx.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, size: 2 + Math.random() * 4, col: cols[(Math.random() * cols.length) | 0], star: i % 3 === 0 });
+            }
+            recRing = { x, y, r: 6, a: 1 };
+        }
+
+        /* 4) Yıldızın ortasına gelince REKOR (borunun tamamen geçilmesini beklemez) */
+        const _up = updatePipes;
+        updatePipes = function (dt, ds) {
+            _up(dt, ds);
+            if (recordBroken || highScore <= 0) return;
+            for (const p of pipes) {
+                if (p.idx === highScore && player.x >= p.x + p.width / 2) {
+                    recordBroken = true; newRecordRun = true; recordFlash = 110;
+                    explodeStar(p.x + p.width / 2, (p.topHeight + p.bottomY) / 2);
+                    sounds.playRecord(); triggerVibration(150);
+                    break;
+                }
+            }
+        };
+
+        /* 5) Rekor kırılınca yıldız çizilmesin */
+        const _drs = drawRecordStar;
+        drawRecordStar = function (pipe) { if (!recordBroken) _drs(pipe); };
+
+        /* 6) Patlama parçacıklarını çiz (oyun duraklayınca donar) */
+        const _hud = drawScoreHUD;
+        drawScoreHUD = function () {
+            _hud();
+            if (!recDraw()) return;
+        };
+        function recDraw() {
+            if (!recFx.length && !recRing) return false;
+            const playing = gameState === 'PLAYING';
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            if (recRing) {
+                ctx.globalAlpha = Math.max(0, recRing.a);
+                ctx.strokeStyle = '#fde047'; ctx.lineWidth = 5 * recRing.a + 1;
+                ctx.beginPath(); ctx.arc(recRing.x, recRing.y, recRing.r, 0, Math.PI * 2); ctx.stroke();
+                if (playing) { recRing.r += 4.5; recRing.a -= 0.05; recRing.x -= PIPE_SPEED; }
+                if (recRing.a <= 0) recRing = null;
+            }
+            for (let i = recFx.length - 1; i >= 0; i--) {
+                const p = recFx[i];
+                ctx.globalAlpha = Math.max(0, p.life);
+                ctx.fillStyle = p.col;
+                if (p.star) {
+                    const s = p.size * 1.6;
+                    ctx.beginPath(); ctx.moveTo(p.x, p.y - s); ctx.lineTo(p.x + s * .3, p.y - s * .3); ctx.lineTo(p.x + s, p.y);
+                    ctx.lineTo(p.x + s * .3, p.y + s * .3); ctx.lineTo(p.x, p.y + s); ctx.lineTo(p.x - s * .3, p.y + s * .3);
+                    ctx.lineTo(p.x - s, p.y); ctx.lineTo(p.x - s * .3, p.y - s * .3); ctx.closePath(); ctx.fill();
+                } else { ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life + 0.5, 0, Math.PI * 2); ctx.fill(); }
+                if (playing) { p.x += p.vx - PIPE_SPEED * 0.6; p.y += p.vy; p.vx *= 0.97; p.vy = p.vy * 0.97 + 0.08; p.life -= 0.022; }
+                if (p.life <= 0) recFx.splice(i, 1);
+            }
+            ctx.restore();
+            return true;
+        }
+
+        /* 7) Yeni oyunda temizle + sesin kilidini aç */
+        const _sg = startGame;
+        startGame = function () { recFx = []; recRing = null; unlockRec(); _sg(); };
+
+        /* 8) Rekoru "kırdım" deyip boruya çarparak ölürsen bitiş ekranında sahte rekor yazmasın */
+        const _tgo = triggerGameOver;
+        triggerGameOver = function () {
+            if (newRecordRun && score <= highScore) newRecordRun = false;
+            _tgo();
+        };
+    })();
 </script>
 </body>
 </html>
